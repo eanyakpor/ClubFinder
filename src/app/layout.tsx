@@ -24,10 +24,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className="bg-gray-50 text-black-900">
+      <header className="flex items-center justify-between px-4 py-3 bg-[#CC0000] text-white">
+        <h1 className="text-lg font-semibold">CSUN Club Finder</h1>
+        {/* <a href="/submit" className="rounded bg-black px-3 py-1 text-sm hover:bg-gray-800">
+        Club/Org: Submit or Update
+        </a> */}
+        </header>
+        <main className=" bg-gray-50 mx-auto max-w-3x1 p-6">{children}</main>
+        <footer className="bg-gray-50 px-4 py-6 text-center text-xs text-gray-500">
+          © 2025 CSUN Club Finder
+        </footer>
       </body>
     </html>
   );
