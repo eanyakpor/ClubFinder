@@ -6,7 +6,8 @@ import { supabaseBrowser } from "./lib/supabase";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles", // force PST/PDT for display
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -17,7 +18,7 @@ function fmtDate(iso: string) {
 
 export default async function Home() {
   const sb = supabaseBrowser();
-  const nowIso = new Date().toISOString();
+  const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
 
   const { data: upcoming, error: errUpcoming } = await sb
     .from("events")
@@ -62,7 +63,7 @@ export default async function Home() {
                   <h3 className="text-2xl font-bold text-gray-900">{e.club_name}</h3>
                   <p className="text-lg text-gray-600 italic">{e.title}</p>
                   <p className="mt-1 text-lg text-gray-700">
-                    {new Date(e.start_time).toLocaleString()}
+                    {fmtDate(e.start_time)}
                     {e.location ? ` • ${e.location}` : ""}
                   </p>
                   {e.description && (
