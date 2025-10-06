@@ -1,4 +1,7 @@
 // src/app/page.tsx
+export const revalidate = 0;            // don't cache this page
+export const dynamic = "force-dynamic"; // force dynamic rendering
+
 import { supabaseBrowser } from "./lib/supabase";
 
 function fmtDate(iso: string) {
@@ -55,24 +58,17 @@ export default async function Home() {
           <ul className="space-y-6">
             {upcoming.map((e) => (
               <li key={e.id}>
-               <article className="rounded-2xl border bg-white p-4 shadow-sm">
-                {/* Club name (main header) */}
-                <h3 className="text-2xl font-bold text-gray-900">{e.club_name}</h3>
-
-                {/* Event title (secondary, slightly smaller) */}
-                <p className="text-lg text-gray-600 italic">{e.title}</p>
-
-                {/* Date + Location */}
-                <p className="mt-1 text-lg text-gray-700">
-                  {new Date(e.start_time).toLocaleString()}
-                  {e.location ? ` • ${e.location}` : ""}
-                </p>
-
-                {/* Optional description */}
-                {e.description && (
-                  <p className="mt-2 text-lg text-gray-600">{e.description}</p>
-                )}
-              </article>
+                <article className="rounded-2xl border bg-white p-4 shadow-sm">
+                  <h3 className="text-2xl font-bold text-gray-900">{e.club_name}</h3>
+                  <p className="text-lg text-gray-600 italic">{e.title}</p>
+                  <p className="mt-1 text-lg text-gray-700">
+                    {new Date(e.start_time).toLocaleString()}
+                    {e.location ? ` • ${e.location}` : ""}
+                  </p>
+                  {e.description && (
+                    <p className="mt-2 text-lg text-gray-600">{e.description}</p>
+                  )}
+                </article>
               </li>
             ))}
           </ul>
@@ -92,19 +88,12 @@ export default async function Home() {
             {past.map((e) => (
               <li key={e.id}>
                 <article className="rounded-3xl border-2 border-black bg-white p-7">
-                  <div className="flex items-start justify-between gap-6">
-                    <h3 className="text-2xl font-extrabold leading-snug">{e.title}</h3>
-
-                    <span className="shrink-0 rounded-full border-2 border-black px-4 py-1.5 text-sm font-semibold text-gray-800">
-                      {e.club_name ?? "—"}
-                    </span>
-                  </div>
-
+                  <h3 className="text-2xl font-extrabold leading-snug">{e.club_name}</h3>
+                  <p className="text-lg text-gray-600 italic">{e.title}</p>
                   <p className="mt-3 text-base text-gray-700">
                     {fmtDate(e.start_time)}
                     {e.location ? ` • ${e.location}` : ""}
                   </p>
-
                   {e.description && (
                     <p className="mt-4 text-base leading-relaxed text-gray-700">{e.description}</p>
                   )}
@@ -115,7 +104,6 @@ export default async function Home() {
         )}
       </section>
 
-      {/* footer (optional) */}
       <footer className="mt-12 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} CSUN Club Finder
       </footer>
