@@ -1,0 +1,18 @@
+[
+    {
+      "id": "evt_1",
+      "club": "Swim Club",
+      "title": "Beginner Swim Session",
+      "start": "2025-10-22T18:00:00-07:00",
+      "location": "SRC Pool",
+      "tags": ["wellness", "life-skill"]
+    },
+    {
+      "id": "evt_2",
+      "club": "MESA",
+      "title": "STEM Internship Info Night",
+      "start": "2025-10-23T17:30:00-07:00",
+      "location": "Jacaranda Hall 2217",
+      "tags": ["career", "networking"]
+    }
+  ]
