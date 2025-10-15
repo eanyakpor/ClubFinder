@@ -8,6 +8,11 @@ const supabase = createClient(
 );
 
 export default function AdminModeration() {
+  if (process.env.NEXT_PUBLIC_APP_MODE === "preview")
+  {
+    return null;
+  }
+    
   const [rows, setRows] = useState<any[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
