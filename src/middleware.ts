@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
+  // --- Preview guard: block writes in PR previews ---
+  const isPreview = process.env.VERCEL_ENV === "preview";
+  const isWriteMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method.toUpperCase());
+
+  if (isPreview && isWriteMethod) {
+    // Optionally allow certain internal endpoints to still work:
+    // const isSafeEndpoint = pathname.startsWith("/api/health");
+    // if (!isSafeEndpoint) {
+    return new NextResponse("Writes disabled in Preview", { status: 403 });
+    // }
+  }
   const pathname = req.nextUrl.pathname;
   
   // ALWAYS log - this should show for EVERY request
