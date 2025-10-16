@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en" className={inter.className}>
       <NavBar />
       <body>
-        <main className=" bg-gray-50 mx-auto max-w-3x1 p-6">{children}</main>
+        <main className=" bg-background text-foreground w-[100svw]">{children}</main>
       </body>
     </html>
   );
