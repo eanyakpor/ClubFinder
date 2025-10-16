@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+:root {
+  --color-primary: 241 72% 65%;  /* pretty lavender */
+  --color-secondary: 222 75% 60%; /* indigo */
+}
+
+body {
+  font-family: var(--font-geist-sans);
+  background-color: black;
+}
+
