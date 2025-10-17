@@ -1,5 +1,6 @@
 import { SectionCards } from "./components/section-cards";
 import RSVPTrends from './components/RSVPTrends'
+import ReachvsEngagementChart from './components/ReachvsEngagementChart'
 
 export default function Page() {
   return (
@@ -11,7 +12,7 @@ export default function Page() {
           <h1 className="text-2xl font-semibold text-center">Activity & Trends</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 lg:px-6">
             <RSVPTrends />
-            <RSVPTrends />
+            <ReachvsEngagementChart />
           </div>
         </div>
       </div>
