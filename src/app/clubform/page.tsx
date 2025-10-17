@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import AddDiscordIntegration from "../components/Integrations/AddDiscordIntegration";
+import ConnectToDiscordButton from "../components/Integrations/AddToDiscordButton";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +20,14 @@ type FormState = {
   other?: string;           // optional
   repeat_weekly?: boolean;  // optional
   repeat_until?: string;    // optional (yyyy-mm-dd)
+  post_to_discord?: boolean; // optional
+};
+
+type ClubRow = {
+  id: string;
+  discord_channel_id: string | null;
+  name?: string | null;
+  email?: string | null;
 };
 
 export default function ClubFormPage() {
@@ -31,14 +41,61 @@ export default function ClubFormPage() {
     other: "",
     repeat_weekly: false,
     repeat_until: "",
+    post_to_discord: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [ok, setOk] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [clubId, setClubId] = useState<string | null>(null);
+  const [discordConnected, setDiscordConnected] = useState<boolean>(false);
+  const [needsClubOnboarding, setNeedsClubOnboarding] = useState<boolean>(false);
 
   function onChange<K extends keyof FormState>(key: K, v: FormState[K]) {
     setForm((f) => ({ ...f, [key]: v }));
   }
+
+  useEffect(() => {
+    (async () => {
+      console.log("[clubform] loading user + club…");
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr) {
+        console.error("[clubform] getUser error:", userErr);
+        return;
+      }
+      if (!user) {
+        console.log("[clubform] no user; not fetching club");
+        return;
+      }
+
+      const { data: club, error } = await supabase
+        .from("clubs")
+        .select("id, discord_channel_id, name, email")
+        .eq("owner_user_id", user.id)
+        .maybeSingle<ClubRow>();
+
+      if (error) {
+        console.error("[clubform] failed to load club:", error);
+        return;
+      }
+
+      if (!club) {
+        console.log("[clubform] no club row found for this user; prompt onboarding");
+        setNeedsClubOnboarding(true);
+        setClubId(null);
+        setDiscordConnected(false);
+        return;
+      }
+
+      console.log("[clubform] club loaded:", club);
+      setNeedsClubOnboarding(false);
+      setClubId(club.id);
+      setDiscordConnected(!!club.discord_channel_id);
+    })();
+  }, []);
+
+  useEffect(() => {
+    console.log("[clubform] clubId state now:", clubId, "discordConnected:", discordConnected);
+  }, [clubId, discordConnected]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +143,36 @@ export default function ClubFormPage() {
       const { error } = await supabase.from("events").insert(payload);
       if (error) throw error;
 
-      setOk("Submitted! We’ll review it before it appears on the homepage.");
+      // Post to Discord if enabled and Discord is connected
+      if (form.post_to_discord && clubId && discordConnected) {
+        try {
+          const discordPayload = {
+            clubId,
+            title: form.event_name.trim(),
+            description: form.other?.trim() || null,
+            location: form.location?.trim() || null,
+            start_time: startIso,
+          };
+
+          const discordResponse = await fetch("/api/discord/post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(discordPayload),
+          });
+
+          if (discordResponse.ok) {
+            setOk("Submitted! Event saved and posted to Discord. We'll review it before it appears on the homepage.");
+          } else {
+            setOk("Submitted! Event saved but failed to post to Discord. We'll review it before it appears on the homepage.");
+          }
+        } catch (discordError) {
+          console.error("Discord posting failed:", discordError);
+          setOk("Submitted! Event saved but failed to post to Discord. We'll review it before it appears on the homepage.");
+        }
+      } else {
+        setOk("Submitted! We'll review it before it appears on the homepage.");
+      }
+
       setForm({
         club_name: "",
         club_email: "",
@@ -97,6 +183,7 @@ export default function ClubFormPage() {
         other: "",
         repeat_weekly: false,
         repeat_until: "",
+        post_to_discord: false,
       });
     } catch (e: any) {
       console.error("Insert failed:", e);
@@ -229,16 +316,51 @@ export default function ClubFormPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded bg-black px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-60"
-        >
-          {submitting ? "Submitting..." : "Submit"}
-        </button>
+        {/* 👇 Discord section right before Submit */}
+        <div className="border-t pt-4">
+          <h3 className="text-sm font-medium mb-2">Post this event to Discord?</h3>
+          <p className="text-xs text-gray-600 mb-3">
+            Step 1: Invite the bot to your server. Step 2: Sign in with Discord to choose where to post.
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <ConnectToDiscordButton />
+            {needsClubOnboarding ? (
+              <a href="/onboarding/club" className="px-3 py-2 rounded border">
+                Create your club first
+              </a>
+            ) : clubId ? (
+              <AddDiscordIntegration clubId={clubId} />
+            ) : (
+              <span className="text-sm text-gray-600">Sign in to your account to link Discord.</span>
+            )}
+          </div>
+          
+          {discordConnected && (
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="post_to_discord"
+                checked={form.post_to_discord || false}
+                onChange={(e) => onChange("post_to_discord", e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="post_to_discord" className="text-sm font-medium">
+                Post this event to Discord
+              </label>
+            </div>
+          )}
+        </div>
 
-        {ok && <p className="text-green-600">{ok}</p>}
-        {err && <p className="text-red-600">{err}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded bg-black px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-60"
+      >
+        {submitting ? "Submitting..." : "Submit"}
+      </button>
+
+      {ok && <p className="text-green-600">{ok}</p>}
+      {err && <p className="text-red-600">{err}</p>}
       </form>
     </main>
   );
