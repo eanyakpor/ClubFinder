@@ -40,7 +40,14 @@ export async function SectionCards() {
             {totalReach.toLocaleString()}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
+            <Badge
+              variant="outline"
+              className={`${
+                totalReach > previousTotalReach
+                  ? "text-green-600 border-green-600"
+                  : "text-red-500 border-red-500"
+              }`}
+            >
               {totalReach > previousTotalReach ? (
                 <IconTrendingUp />
               ) : (
@@ -54,11 +61,13 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {totalReach > previousTotalReach ? (
               <>
-                Trending up this month <IconTrendingUp className="size-4" />
+                Visibility is growing this month{" "}
+                <IconTrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Trending down this month <IconTrendingDown className="size-4" />
+                Fewer students reached this month{" "}
+                <IconTrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -77,7 +86,14 @@ export async function SectionCards() {
             {newMembers.toLocaleString()}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
+            <Badge
+              variant="outline"
+              className={`${
+                newMembers > previousNewMembers
+                  ? "text-green-600 border-green-600"
+                  : "text-red-500 border-red-500"
+              }`}
+            >
               {newMembers > previousNewMembers ? (
                 <IconTrendingUp />
               ) : (
@@ -91,11 +107,13 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {newMembers > previousNewMembers ? (
               <>
-                Trending up this month <IconTrendingUp className="size-4" />
+                Membership growth increasing{" "}
+                <IconTrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Trending down this month <IconTrendingDown className="size-4" />
+                Member sign-ups slowing down{" "}
+                <IconTrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -112,7 +130,14 @@ export async function SectionCards() {
             {RSVPCount.toLocaleString()}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
+            <Badge
+              variant="outline"
+              className={`${
+                RSVPCount > previousRSVPCount
+                  ? "text-green-600 border-green-600"
+                  : "text-red-500 border-red-500"
+              }`}
+            >
               {RSVPCount > previousRSVPCount ? (
                 <IconTrendingUp />
               ) : (
@@ -126,11 +151,13 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {RSVPCount > previousRSVPCount ? (
               <>
-                Trending up this month <IconTrendingUp className="size-4" />
+                Event participation on the rise{" "}
+                <IconTrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Trending down this month <IconTrendingDown className="size-4" />
+                Fewer RSVPs across events{" "}
+                <IconTrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -149,7 +176,14 @@ export async function SectionCards() {
             {engagementRate.toFixed(1)}%
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
+            <Badge
+              variant="outline"
+              className={`${
+                engagementRate > previousEngagementRate
+                  ? "text-green-600 border-green-600"
+                  : "text-red-500 border-red-500"
+              }`}
+            >
               {engagementRate > previousEngagementRate ? (
                 <IconTrendingUp />
               ) : (
@@ -163,16 +197,18 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {engagementRate > previousEngagementRate ? (
               <>
-                Trending up this month <IconTrendingUp className="size-4" />
+                Audience interactions increasing{" "}
+                <IconTrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Trending down this month <IconTrendingDown className="size-4" />
+                Lower engagement on recent posts{" "}
+                <IconTrendingDown className="size-4" />
               </>
             )}
           </div>
           <div className="text-muted-foreground">
-            Interaction level likes, link clicks, etc.
+            Interaction levels from likes, comments, and link clicks.
           </div>
         </CardFooter>
       </Card>
