@@ -46,7 +46,7 @@ export default function ReachvsEngagementChart() {
     <Card>
       <CardHeader>
         <CardTitle>Reach vs Engagement</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>January - June 2025</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
