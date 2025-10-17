@@ -22,12 +22,19 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const chartData = [
-  { month: "January", RSVPs: 186 },
-  { month: "February", RSVPs: 305 },
-  { month: "March", RSVPs: 237 },
-  { month: "April", RSVPs: 73 },
-  { month: "May", RSVPs: 209 },
-  { month: "June", RSVPs: 214 },
+  // 12 months
+  { date: "2025-01-01", RSVPs: 186 },
+  { date: "2025-02-01", RSVPs: 305 },
+  { date: "2025-03-01", RSVPs: 237 },
+  { date: "2025-04-01", RSVPs: 73 },
+  { date: "2025-05-01", RSVPs: 209 },
+  { date: "2025-06-01", RSVPs: 214 },
+  { date: "2025-07-01", RSVPs: 229 },
+  { date: "2025-08-01", RSVPs: 244 },
+  { date: "2025-09-01", RSVPs: 259 },
+  { date: "2025-10-01", RSVPs: 274 },
+  { date: "2025-11-01", RSVPs: 289 },
+  { date: "2025-12-01", RSVPs: 304 },
 ]
 
 const chartConfig = {
@@ -40,6 +47,17 @@ const chartConfig = {
 function RSVPTrends() {
   const isMobile = useIsMobile()
 
+  const filteredData = chartData.filter((data) => {
+    // If mobile, only show prior 6 months
+    const date = new Date(data.date);
+
+    if (isMobile) {
+      return date >= new Date("2025-01-01") && date <= new Date("2025-06-01");
+    }
+
+    return true;
+  });
+
   return (
     <Card className="">
       <CardHeader>
@@ -48,14 +66,19 @@ function RSVPTrends() {
       </CardHeader>
       <CardContent className="flex justify-center">
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart accessibilityLayer data={filteredData}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => {
+                const date = new Date(value + 'T00:00:00');
+                return date.toLocaleDateString("en-US", {
+                  month: "short",
+                });
+              }}
             />
               <YAxis
                 tickLine={false}

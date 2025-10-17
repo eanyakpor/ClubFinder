@@ -17,17 +17,25 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const description = "A multiple line chart";
 
 const chartData = [
-  // Mock Data (6 months)
-  { month: "January", reach: 1502, engagement: 141 },
-  { month: "February", reach: 1788, engagement: 183 },
-  { month: "March", reach: 1827, engagement: 203 },
-  { month: "April", reach: 1956, engagement: 235 },
-  { month: "May", reach: 2085, engagement: 269 },
-  { month: "June", reach: 2214, engagement: 301 },
+  // Mock Data (12 months)
+  { date: "2025-01", reach: 1502, engagement: 141 },
+  { date: "2025-02", reach: 1788, engagement: 183 },
+  { date: "2025-03", reach: 1827, engagement: 203 },
+  { date: "2025-04", reach: 1956, engagement: 235 },
+  { date: "2025-05", reach: 2085, engagement: 269 },
+  { date: "2025-06", reach: 2214, engagement: 301 },
+  { date: "2025-07", reach: 2343, engagement: 335 },
+  { date: "2025-08", reach: 2472, engagement: 367 },
+  { date: "2025-09", reach: 2601, engagement: 409 },
+  { date: "2025-10", reach: 2730, engagement: 441 },
+  { date: "2025-11", reach: 2859, engagement: 473 },
+  { date: "2025-12", reach: 2988, engagement: 505 },
 ];
 
 const chartConfig = {
@@ -42,6 +50,19 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function ReachvsEngagementChart() {
+  const isMobile = useIsMobile();
+
+  const filteredData = chartData.filter((data) => {
+    // If mobile, only show prior 6 months
+    const date = new Date(data.date);
+
+    if (isMobile) {
+      return date >= new Date("2025-01") && date <= new Date("2025-06");
+    }
+
+    return true;
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -52,7 +73,7 @@ export default function ReachvsEngagementChart() {
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
           <AreaChart
             accessibilityLayer
-            data={chartData}
+            data={filteredData}
             margin={{
               left: 12,
               right: 12,
@@ -60,11 +81,17 @@ export default function ReachvsEngagementChart() {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => {
+                // Add 'T00:00:00' to ensure local timezone handling
+                const date = new Date(value + 'T00:00:00');
+                return date.toLocaleDateString("en-US", {
+                  month: "short",
+                });
+              }}
             />
             <YAxis
               tickLine={false}
@@ -72,7 +99,15 @@ export default function ReachvsEngagementChart() {
               tickMargin={8}
               tickFormatter={(value) => value.toLocaleString()}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent className="" />}  />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent labelFormatter={(value) => {
+                const date = new Date(value + 'T00:00:00');
+                return date.toLocaleDateString("en-US", {
+                  month: "long",
+                });
+              }} />}
+            />
             <Area
               dataKey="reach"
               type="monotone"
