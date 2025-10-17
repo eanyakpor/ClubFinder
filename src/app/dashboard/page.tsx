@@ -1,20 +1,17 @@
-import { AppSidebar } from "@/components/analytics/app-sidebar";
-import { ChartAreaInteractive } from "@/components/analytics/chart-area-interactive";
-import { DataTable } from "@/components/analytics/data-table";
-import { SectionCards } from "@/components/analytics/section-cards";
-
-import data from "./data.json";
+import { SectionCards } from "./components/section-cards";
+import RSVPTrends from './components/RSVPTrends'
 
 export default function Page() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <h1 className="text-2xl font-semibold text-center">This Month's Summary</h1>
           <SectionCards />
+          <h1 className="text-2xl font-semibold text-center">Analytics & Trends</h1>
           <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
+            <RSVPTrends />
           </div>
-          <DataTable data={data} />
         </div>
       </div>
     </div>
