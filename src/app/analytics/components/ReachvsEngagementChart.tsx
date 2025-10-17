@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -23,19 +23,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export const description = "A multiple line chart";
 
 const chartData = [
-  // Mock Data (12 months)
-  { date: "2025-01", reach: 1502, engagement: 141 },
-  { date: "2025-02", reach: 1788, engagement: 183 },
-  { date: "2025-03", reach: 1827, engagement: 203 },
-  { date: "2025-04", reach: 1956, engagement: 235 },
-  { date: "2025-05", reach: 2085, engagement: 269 },
-  { date: "2025-06", reach: 2214, engagement: 301 },
-  { date: "2025-07", reach: 2343, engagement: 335 },
-  { date: "2025-08", reach: 2472, engagement: 367 },
-  { date: "2025-09", reach: 2601, engagement: 409 },
-  { date: "2025-10", reach: 2730, engagement: 441 },
-  { date: "2025-11", reach: 2859, engagement: 473 },
-  { date: "2025-12", reach: 2988, engagement: 505 },
+  // 12 months
+  { date: "2025-11", reach: 124, engagement: 10 },
+  { date: "2025-12", reach: 155, engagement: 30 },
+  { date: "2025-01", reach: 186, engagement: 44 },
+  { date: "2025-02", reach: 305, engagement: 92 },
+  { date: "2025-03", reach: 237, engagement: 44 },
+  { date: "2025-04", reach: 209, engagement: 35 },
+  { date: "2025-05", reach: 229, engagement: 41 },
+  { date: "2025-06", reach: 185, engagement: 25 },
+  { date: "2025-07", reach: 192, engagement: 28 },
+  { date: "2025-08", reach: 214, engagement: 35 },
+  { date: "2025-09", reach: 229, engagement: 44 },
+  { date: "2025-10", reach: 244, engagement: 56 },
 ];
 
 const chartConfig = {
@@ -53,21 +53,47 @@ export default function ReachvsEngagementChart() {
   const isMobile = useIsMobile();
 
   const filteredData = chartData.filter((data) => {
-    // If mobile, only show prior 6 months
+    // If mobile, only show last 6 months
     const date = new Date(data.date);
 
     if (isMobile) {
-      return date >= new Date("2025-01") && date <= new Date("2025-06");
+      const now = new Date();
+      const sixMonthsAgo = new Date(
+        now.getFullYear(),
+        now.getMonth() - 6,
+        now.getDate()
+      );
+      return date >= sixMonthsAgo && date <= now;
     }
 
     return true;
   });
 
+  const currentEngagementToReachRatio = () => {
+    const currentData = filteredData[filteredData.length - 1];
+    const engagementToReachRatio = currentData.engagement / currentData.reach;
+    return engagementToReachRatio;
+  }
+
+  const getAverageEngagementToReachRatio = () => {
+    const totalReach = filteredData.reduce((total, data) => total + data.reach, 0);
+    const totalEngagement = filteredData.reduce((total, data) => total + data.engagement, 0);
+    const averageReach = totalReach / filteredData.length;
+    const averageEngagement = totalEngagement / filteredData.length;
+    return averageEngagement / averageReach;
+  };
+
+  const engagementToReachRatioChange = () => {
+    const currentRatio = currentEngagementToReachRatio();
+    const averageRatio = getAverageEngagementToReachRatio();
+    const percentageChange = ((currentRatio - averageRatio) / averageRatio) * 100;
+    return percentageChange;
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Reach vs Engagement</CardTitle>
-        <CardDescription>January - June 2025</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
@@ -129,10 +155,20 @@ export default function ReachvsEngagementChart() {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 leading-none font-medium">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+              {engagementToReachRatioChange() > 0 ? (
+                <>
+                  Engagement efficiency up by {engagementToReachRatioChange().toFixed(2)}% this month
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </>
+              ) : (
+                <>
+                  Engagement efficiency down by {Math.abs(engagementToReachRatioChange()).toFixed(2)}% this month
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                </>
+              )}
             </div>
             <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              Compare impressions vs. engagement to spot successful content.
+              Showing reach vs. engagement for the past {isMobile ? "6 months" : "12 months"}
             </div>
           </div>
         </div>
