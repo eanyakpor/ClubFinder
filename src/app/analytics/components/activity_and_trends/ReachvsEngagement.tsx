@@ -19,24 +19,9 @@ import {
 } from "@/components/ui/chart";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getReachVsEngagement } from "@/app/lib/analyticsClient";
 
 export const description = "A multiple line chart";
-
-const chartData = [
-  // 12 months
-  { date: "2025-11", reach: 124, engagement: 10 },
-  { date: "2025-12", reach: 155, engagement: 30 },
-  { date: "2025-01", reach: 186, engagement: 44 },
-  { date: "2025-02", reach: 305, engagement: 92 },
-  { date: "2025-03", reach: 237, engagement: 44 },
-  { date: "2025-04", reach: 209, engagement: 35 },
-  { date: "2025-05", reach: 229, engagement: 41 },
-  { date: "2025-06", reach: 185, engagement: 25 },
-  { date: "2025-07", reach: 192, engagement: 28 },
-  { date: "2025-08", reach: 214, engagement: 35 },
-  { date: "2025-09", reach: 229, engagement: 44 },
-  { date: "2025-10", reach: 244, engagement: 56 },
-];
 
 const chartConfig = {
   reach: {
@@ -51,31 +36,50 @@ const chartConfig = {
 
 export default function ReachvsEngagement() {
   const isMobile = useIsMobile();
+  const [chartData, setChartData] = React.useState<Array<{date: string, reach: number, engagement: number}>>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const filteredData = chartData.filter((data) => {
-    // If mobile, only show last 6 months
-    const date = new Date(data.date);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getReachVsEngagement();
+        setChartData(data);
+      } catch (error) {
+        console.error('Error fetching reach vs engagement:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-    if (isMobile) {
-      const now = new Date();
-      const sixMonthsAgo = new Date(
-        now.getFullYear(),
-        now.getMonth() - 6,
-        now.getDate()
-      );
-      return date >= sixMonthsAgo && date <= now;
-    }
+  const filteredData = React.useMemo(() => {
+    return chartData.filter((data) => {
+      // If mobile, only show last 6 months
+      const date = new Date(data.date + '-01');
 
-    return true;
-  });
+      if (isMobile) {
+        const now = new Date();
+        const sixMonthsAgo = new Date(
+          now.getFullYear(),
+          now.getMonth() - 6,
+          now.getDate()
+        );
+        return date >= sixMonthsAgo && date <= now;
+      }
+
+      return true;
+    });
+  }, [chartData, isMobile]);
 
   const currentEngagementToReachRatio = () => {
+    if (filteredData.length === 0) return 0;
     const currentData = filteredData[filteredData.length - 1];
-    const engagementToReachRatio = currentData.engagement / currentData.reach;
-    return engagementToReachRatio;
+    return currentData.engagement / currentData.reach;
   }
 
   const getAverageEngagementToReachRatio = () => {
+    if (filteredData.length === 0) return 0;
     const totalReach = filteredData.reduce((total, data) => total + data.reach, 0);
     const totalEngagement = filteredData.reduce((total, data) => total + data.engagement, 0);
     const averageReach = totalReach / filteredData.length;
@@ -86,6 +90,7 @@ export default function ReachvsEngagement() {
   const engagementToReachRatioChange = () => {
     const currentRatio = currentEngagementToReachRatio();
     const averageRatio = getAverageEngagementToReachRatio();
+    if (averageRatio === 0) return 0;
     const percentageChange = ((currentRatio - averageRatio) / averageRatio) * 100;
     return percentageChange;
   };

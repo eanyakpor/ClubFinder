@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -19,22 +20,7 @@ import {
 } from "@/components/ui/chart";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const chartData = [
-  // 12 months
-  { date: "2025-11", RSVPs: 289 },
-  { date: "2025-12", RSVPs: 304 },
-  { date: "2025-01", RSVPs: 186 },
-  { date: "2025-02", RSVPs: 305 },
-  { date: "2025-03", RSVPs: 237 },
-  { date: "2025-04", RSVPs: 73 },
-  { date: "2025-05", RSVPs: 209 },
-  { date: "2025-06", RSVPs: 214 },
-  { date: "2025-07", RSVPs: 229 },
-  { date: "2025-08", RSVPs: 244 },
-  { date: "2025-09", RSVPs: 259 },
-  { date: "2025-10", RSVPs: 232 },
-];
+import { getMonthlyRSVPs } from "@/app/lib/analyticsClient";
 
 const chartConfig = {
   RSVPs: {
@@ -45,26 +31,46 @@ const chartConfig = {
 
 export default function InterestTrends() {
   const isMobile = useIsMobile();
+  const [chartData, setChartData] = React.useState<Array<{date: string, RSVPs: number}>>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getMonthlyRSVPs();
+        setChartData(data);
+      } catch (error) {
+        console.error('Error fetching monthly RSVPs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const currentMonth = chartData[chartData.length - 1];
 
-  const filteredData = chartData.filter((data) => {
-    // If mobile, only show last 6 months
-    const date = new Date(data.date);
+  const filteredData = React.useMemo(() => {
+    return chartData.filter((data) => {
+      // If mobile, only show last 6 months
+      const date = new Date(data.date + '-01');
 
-    if (isMobile) {
-      const now = new Date();
-      const sixMonthsAgo = new Date(
-        now.getFullYear(),
-        now.getMonth() - 6,
-        now.getDate()
-      );
-      return date >= sixMonthsAgo && date <= now;
-    }
+      if (isMobile) {
+        const now = new Date();
+        const sixMonthsAgo = new Date(
+          now.getFullYear(),
+          now.getMonth() - 6,
+          now.getDate()
+        );
+        return date >= sixMonthsAgo && date <= now;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [chartData, isMobile]);
 
   const compareToAverage = () => {
+    if (filteredData.length === 0 || !currentMonth) return 0;
     const totalRSVPs = filteredData.reduce(
       (total, data) => total + data.RSVPs,
       0

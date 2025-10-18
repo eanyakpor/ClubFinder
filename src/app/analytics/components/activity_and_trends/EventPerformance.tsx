@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -19,25 +20,7 @@ import {
 } from "@/components/ui/chart";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const chartData = [
-  { Date: "2024-11", Event: "Coding Competition", Rsvps: 100, Attendance: 70, Engagement: 190 },
-  { Date: "2024-12", Event: "Job Fair", Rsvps: 124, Attendance: 95, Engagement: 280 },
-  { Date: "2025-01", Event: "Startup Pitch Competition", Rsvps: 120, Attendance: 95, Engagement: 280 },
-  { Date: "2025-02", Event: "Cybersecurity Competition", Rsvps: 150, Attendance: 120, Engagement: 280 },
-  { Date: "2025-02", Event: "Blockchain Workshop", Rsvps: 90, Attendance: 60, Engagement: 150 },
-  { Date: "2025-03", Event: "Data Science Meetup", Rsvps: 180, Attendance: 150, Engagement: 400 },
-  { Date: "2025-04", Event: "Leetcode Workshop", Rsvps: 289, Attendance: 220, Engagement: 600 },
-  { Date: "2025-04", Event: "Mock Interview", Rsvps: 80, Attendance: 50, Engagement: 150 },
-  { Date: "2025-05", Event: "Mental Health Fair", Rsvps: 100, Attendance: 70, Engagement: 190 },
-  { Date: "2025-05", Event: "Women in Tech Panel", Rsvps: 140, Attendance: 110, Engagement: 250 },
-  { Date: "2025-06", Event: "AI Workshop", Rsvps: 210, Attendance: 180, Engagement: 350 },
-  { Date: "2025-07", Event: "Resume Workshop", Rsvps: 172, Attendance: 140, Engagement: 250 },
-  { Date: "2025-08", Event: "Networking Event", Rsvps: 100, Attendance: 70, Engagement: 190 },
-  { Date: "2025-09", Event: "Cultural Night", Rsvps: 150, Attendance: 130, Engagement: 310 },
-  { Date: "2025-09", Event: "Homecoming Mixer", Rsvps: 180, Attendance: 150, Engagement: 400 },
-  { Date: "2025-10", Event: "Welcome Week", Rsvps: 120, Attendance: 95, Engagement: 280 },
-];
+import { getEventPerformance } from "@/app/lib/analyticsClient";
 
 
 const chartConfig = {
@@ -49,10 +32,29 @@ const chartConfig = {
 
 export default function EventPerformance() {
   const isMobile = useIsMobile();
+  const [chartData, setChartData] = React.useState<Array<{Date: string, Event: string, Rsvps: number, Attendance: number, Engagement: number}>>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const topEvent = chartData.reduce((prev, current) => {
-    return prev.Attendance > current.Attendance ? prev : current;
-  });
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getEventPerformance();
+        setChartData(data);
+      } catch (error) {
+        console.error('Error fetching event performance:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const topEvent = React.useMemo(() => {
+    if (chartData.length === 0) return null;
+    return chartData.reduce((prev, current) => {
+      return prev.Attendance > current.Attendance ? prev : current;
+    });
+  }, [chartData]);
 
   return (
     <Card className="">
@@ -72,7 +74,7 @@ export default function EventPerformance() {
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              label={{ value: 'Event' }}
+              label={{ value: 'Events' }}
             />
             <YAxis
               tickLine={false}
@@ -83,7 +85,7 @@ export default function EventPerformance() {
               cursor={false}
               content={
                 <ChartTooltipContent
-                
+                  
                 />
               }
             />
@@ -97,14 +99,25 @@ export default function EventPerformance() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 leading-relaxed font-medium">
-          <div className="flex items-center gap-2 leading-relaxed font-medium">
-            {topEvent.Event} had the highest attendance with {topEvent.Attendance} attendees
-          </div>
-        </div>
-        <div className="text-muted-foreground leading-relaxed">
-          Showing total RSVPs for the last {isMobile ? "6 months" : "12 months"}
-        </div>
+        {loading ? (
+          <div className="text-muted-foreground">Loading event data...</div>
+        ) : (
+          <>
+            <div className="flex gap-2 leading-relaxed font-medium">
+              <div className="flex items-center gap-2 leading-relaxed font-medium">
+                {topEvent && (
+                  <>
+                    {topEvent.Event} had the highest attendance with {topEvent.Attendance} attendees
+                  </>
+                )}
+              </div>
+              
+            </div>
+            <div className="text-muted-foreground leading-relaxed">
+              Showing total RSVPs for the last {isMobile ? "6 months" : "12 months"}
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
   );

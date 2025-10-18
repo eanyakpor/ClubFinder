@@ -21,15 +21,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getPlatformEngagement } from "@/app/lib/analyticsClient";
 
 export const description = "A donut chart with text";
-
-const chartData = [
-  { platform: "instagram", clicks: 150, fill: "#E1306C" }, // magenta
-  { platform: "discord", clicks: 170, fill: "#5865F2" }, // blurple
-  { platform: "tiktok", clicks: 180, fill: "#25F4EE" }, // aqua teal
-  { platform: "facebook", clicks: 140, fill: "#1877F2" }, // classic blue
-];
 
 const chartConfig = {
   platform: {
@@ -55,11 +49,29 @@ const chartConfig = {
 
 export default function EngagementByPlatform() {
   const isMobile = useIsMobile();
-  const totalClicks = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.clicks, 0);
+  const [chartData, setChartData] = React.useState<Array<{platform: string, clicks: number, fill: string}>>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getPlatformEngagement();
+        setChartData(data);
+      } catch (error) {
+        console.error('Error fetching platform engagement:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
+  const totalClicks = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.clicks, 0);
+  }, [chartData]);
+
   const topPlatform = () => {
+    if (chartData.length === 0) return null;
     const topPlatform = chartData.reduce((acc, curr) => {
       if (curr.clicks > acc.clicks) {
         return curr;
@@ -129,15 +141,25 @@ export default function EngagementByPlatform() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          {topPlatform().platform.charAt(0).toUpperCase() +
-            topPlatform().platform.slice(1)}{" "}
-          leads with {((topPlatform().clicks / totalClicks) * 100).toFixed(2)}% of total engagement
-        </div>
-        <div className="text-muted-foreground leading-relaxed">
-          Showing all-time distribution of total engagement clicks by social
-          platform
-        </div>
+        {loading ? (
+          <div className="text-muted-foreground">Loading engagement data...</div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 leading-relaxed font-medium">
+              {topPlatform() && (
+                <>
+                  {topPlatform()!.platform.charAt(0).toUpperCase() +
+                    topPlatform()!.platform.slice(1)}{" "}
+                  leads with {((topPlatform()!.clicks / totalClicks) * 100).toFixed(2)}% of total engagement
+                </>
+              )}
+            </div>
+            <div className="text-muted-foreground leading-relaxed">
+              Showing all-time distribution of total engagement clicks by social
+              platform
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
   );
