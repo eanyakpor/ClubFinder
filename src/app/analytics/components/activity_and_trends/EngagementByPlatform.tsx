@@ -89,12 +89,12 @@ export default function EngagementByPlatform() {
           {isMobile ? "(Tap for more info)" : "(Hover for more info)"}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 justify-center items-center pb-0">
+      <CardContent className="flex justify-center">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[400px]"
+          className="min-h-[225px] max-h-[400px] w-full"
         >
-          <PieChart>
+          <PieChart className="">
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
