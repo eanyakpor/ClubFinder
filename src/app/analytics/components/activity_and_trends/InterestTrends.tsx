@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -43,7 +43,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-function RSVPTrends() {
+export default function InterestTrends() {
   const isMobile = useIsMobile();
   const currentMonth = chartData[chartData.length - 1];
 
@@ -78,11 +78,14 @@ function RSVPTrends() {
   return (
     <Card className="">
       <CardHeader>
-        <CardTitle>RSVP Trends</CardTitle>
+        <CardTitle>Interest Trends</CardTitle>
+        <CardDescription>
+          {isMobile ? "(Tap for more info)" : "(Hover for more info)"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
-          <BarChart accessibilityLayer data={filteredData}>
+          <LineChart accessibilityLayer data={filteredData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -106,39 +109,41 @@ function RSVPTrends() {
               cursor={false}
               content={<ChartTooltipContent labelFormatter={(value) => new Date(value + "T00:00:00").toLocaleDateString("en-US", { month: "long" })} />}
             />
-            <Bar
+            <Line
+              type="monotone"
               dataKey="RSVPs"
-              fill="var(--color-chart-1)"
-              className="hover:fill-[var(--color-chart-2)]"
-              radius={2}
+              stroke="var(--color-RSVPs)"
+              strokeWidth={2}
+              activeDot={{
+                r: 6,
+              }}
             />
-          </BarChart>
+          </LineChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 leading-none font-medium">
-          <div className="flex items-center gap-2 leading-none font-medium">
+          <div className="flex items-center gap-2 leading-relaxed font-medium">
             {compareToAverage() > 0 ? (
               <>
-                {compareToAverage().toFixed(2)}% higher RSVP activity than your
+                This month has {compareToAverage().toFixed(2)}% higher RSVP activity than your
                 recent average
                 <TrendingUp className="h-4 w-4 text-green-600" />
               </>
             ) : (
               <>
-                {Math.abs(compareToAverage()).toFixed(2)}% lower RSVP activity
+                This month has {Math.abs(compareToAverage()).toFixed(2)}% lower RSVP activity
                 than your recent average
                 <TrendingDown className="h-4 w-4 text-red-500" />
               </>
             )}
           </div>
         </div>
-        <div className="text-muted-foreground leading-none">
-          Showing total RSVPs for the last {isMobile ? "6 months" : "12 months"}
+        <div className="text-muted-foreground leading-relaxed">
+          Showing total monthly RSVPs for the last {isMobile ? "6 months" : "12 months"}
         </div>
       </CardFooter>
     </Card>
   );
 }
 
-export default RSVPTrends;

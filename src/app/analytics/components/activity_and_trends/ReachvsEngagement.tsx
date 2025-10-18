@@ -49,7 +49,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function ReachvsEngagementChart() {
+export default function ReachvsEngagement() {
   const isMobile = useIsMobile();
 
   const filteredData = chartData.filter((data) => {
@@ -93,7 +93,10 @@ export default function ReachvsEngagementChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reach vs Engagement</CardTitle>
+        <CardTitle>Reach vs. Engagement</CardTitle>
+        <CardDescription>
+          {isMobile ? "(Tap for more info)" : "(Hover for more info)"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="max-h-[400px] w-full">
@@ -154,7 +157,7 @@ export default function ReachvsEngagementChart() {
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
-            <div className="flex items-center gap-2 leading-none font-medium">
+            <div className="flex items-center gap-2 leading-relaxed font-medium">
               {engagementToReachRatioChange() > 0 ? (
                 <>
                   Engagement efficiency up by {engagementToReachRatioChange().toFixed(2)}% this month
@@ -167,7 +170,7 @@ export default function ReachvsEngagementChart() {
                 </>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center gap-2 leading-none">
+            <div className="text-muted-foreground flex items-center gap-2 leading-relaxed">
               Showing reach vs. engagement for the past {isMobile ? "6 months" : "12 months"}
             </div>
           </div>
