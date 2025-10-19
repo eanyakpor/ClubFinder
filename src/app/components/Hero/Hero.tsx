@@ -8,7 +8,7 @@ function Hero({ userType }: { userType: "student" | "club" }) {
     <div className="flex flex-col justify-center items-center gap-8 p-8 h-96">
       {userType === "club" ? (
         <>
-        <h1 className="text-center text-6xl font-bold">
+        <h1 className="text-center text-3xl md:text-5xl lg:text-6xl font-bold">
           Your Hub For Events,
           <br />
           Analytics, and Growth.
@@ -17,7 +17,7 @@ function Hero({ userType }: { userType: "student" | "club" }) {
         </>
       ) : (
         <>
-          <h1 className="text-center text-6xl font-bold">
+          <h1 className="text-center text-3xl md:text-5xl lg:text-6xl font-bold">
             Discover Clubs, Create
             <br />
             Connections, All in One Place.

@@ -11,7 +11,7 @@ function SearchBar() {
       <input
         type="text"
         placeholder="Search"
-        className="outline-none w-[600px] placeholder:text-neutral-500 }"
+        className="outline-none md:w-[400px] lg:w-[600px] placeholder:text-neutral-500 }"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
