@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic"; // force dynamic rendering
 
 import { supabaseBrowser } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
+import Hero from "./components/Hero/Hero";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -47,7 +48,8 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-8 text-black">
+    <main className="">
+      <Hero userType="student" />
       <PreviewBanner />
       <section className="mb-12">
         <h1 className="mb-6 text-4xl font-extrabold tracking-tight">Upcoming Events</h1>

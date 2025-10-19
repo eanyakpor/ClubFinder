@@ -12,7 +12,7 @@ function NavBar() {
   const [isClub, setIsClub] = React.useState(true); // If club account is true, show add club event button
 
   return (
-    <header className="h-14 flex items-center justify-between px-8 border-b-[1px] border-neutral-200">
+    <header className="h-14 flex items-center justify-between px-8 border-b-[1px] border-border">
       <Link href="/">
         <h1 className={alexandria.className}>PROJECT X</h1>
       </Link>
