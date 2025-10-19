@@ -1,10 +1,13 @@
 // src/app/page.tsx
-export const revalidate = 0;            // don't cache this page
+export const revalidate = 0; // don't cache this page
 export const dynamic = "force-dynamic"; // force dynamic rendering
 
 import { supabaseBrowser } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
 import Hero from "./components/Hero/Hero";
+import EventCard from "./components/EventList/EventCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventItem } from "./lib/data";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -21,6 +24,7 @@ function fmtDate(iso: string) {
 export default async function Home() {
   const sb = supabaseBrowser();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
+  const userType = "club";
 
   const { data: upcoming, error: errUpcoming } = await sb
     .from("events")
@@ -37,6 +41,17 @@ export default async function Home() {
     .order("start_time", { ascending: false })
     .limit(10);
 
+  const toEventItem = (event: any): EventItem => {
+    return {
+      id: event.id,
+      title: event.title,
+      club: event.club_name,
+      start: event.start_time,
+      location: event.location,
+      tags: event.tags,
+    };
+  };
+
   if (errUpcoming || errPast) {
     return (
       <main className="mx-auto max-w-5xl p-8 text-black">
@@ -47,66 +62,36 @@ export default async function Home() {
     );
   }
 
+  console.log(upcoming[0]);
+
   return (
     <main className="">
-      <Hero userType="student" />
+      <Hero userType={userType} />
       <PreviewBanner />
-      <section className="mb-12">
-        <h1 className="mb-6 text-4xl font-extrabold tracking-tight">Upcoming Events</h1>
-
-        {!upcoming?.length ? (
-          <div className="rounded-3xl border-2 border-black bg-white p-8">
-            <p className="text-lg text-gray-600">No upcoming events yet.</p>
-          </div>
-        ) : (
-          <ul className="space-y-6">
-            {upcoming.map((e) => (
-              <li key={e.id}>
-                <article className="rounded-2xl border bg-white p-4 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900">{e.club_name}</h3>
-                  <p className="text-lg text-gray-600 italic">{e.title}</p>
-                  <p className="mt-1 text-lg text-gray-700">
-                    {fmtDate(e.start_time)}
-                    {e.location ? ` • ${e.location}` : ""}
-                  </p>
-                  {e.description && (
-                    <p className="mt-2 text-lg text-gray-600">{e.description}</p>
-                  )}
-                </article>
-              </li>
+      <div className="px-20">
+        <Tabs defaultValue="upcoming" className="gap-8">
+          <TabsList>
+            <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
+            <TabsTrigger value="past">Past Events</TabsTrigger>
+          </TabsList>
+          <TabsContent
+            value="upcoming"
+            className="flex flex-wrap gap-8"
+          >
+            {upcoming.map((event) => toEventItem(event)).map((event) => (
+              <EventCard key={event.id} event={event} />
             ))}
-          </ul>
-        )}
-      </section>
-
-      {/* PAST */}
-      <section>
-        <h2 className="mb-6 text-3xl font-extrabold tracking-tight">Past Events</h2>
-
-        {!past?.length ? (
-          <div className="rounded-3xl border-2 border-black bg-white p-8">
-            <p className="text-lg text-gray-600">No past events.</p>
-          </div>
-        ) : (
-          <ul className="space-y-6">
-            {past.map((e) => (
-              <li key={e.id}>
-                <article className="rounded-3xl border-2 border-black bg-white p-7">
-                  <h3 className="text-2xl font-extrabold leading-snug">{e.club_name}</h3>
-                  <p className="text-lg text-gray-600 italic">{e.title}</p>
-                  <p className="mt-3 text-base text-gray-700">
-                    {fmtDate(e.start_time)}
-                    {e.location ? ` • ${e.location}` : ""}
-                  </p>
-                  {e.description && (
-                    <p className="mt-4 text-base leading-relaxed text-gray-700">{e.description}</p>
-                  )}
-                </article>
-              </li>
+          </TabsContent>
+          <TabsContent
+            value="past"
+            className="flex flex-wrap gap-8"
+          >
+            {past.map((event) => toEventItem(event)).map((event) => (
+              <EventCard key={event.id} event={event} />
             ))}
-          </ul>
-        )}
-      </section>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <footer className="mt-12 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} CSUN Club Finder
