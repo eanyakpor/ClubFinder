@@ -1,4 +1,4 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import {TrendingUp, TrendingDown} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,9 +49,9 @@ export async function SectionCards() {
               }`}
             >
               {totalReach > previousTotalReach ? (
-                <IconTrendingUp />
+                <TrendingUp />
               ) : (
-                <IconTrendingDown />
+                <TrendingDown />
               )}
               {getPercentageChange(previousTotalReach, totalReach)}%
             </Badge>
@@ -62,12 +62,12 @@ export async function SectionCards() {
             {totalReach > previousTotalReach ? (
               <>
                 Visibility is growing this month{" "}
-                <IconTrendingUp className="size-4" />
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
                 Fewer students reached this month{" "}
-                <IconTrendingDown className="size-4" />
+                <TrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -95,9 +95,9 @@ export async function SectionCards() {
               }`}
             >
               {newMembers > previousNewMembers ? (
-                <IconTrendingUp />
+                <TrendingUp />
               ) : (
-                <IconTrendingDown />
+                <TrendingDown />
               )}
               {getPercentageChange(previousNewMembers, newMembers)}%
             </Badge>
@@ -108,12 +108,12 @@ export async function SectionCards() {
             {newMembers > previousNewMembers ? (
               <>
                 Membership growth increasing{" "}
-                <IconTrendingUp className="size-4" />
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
                 Member sign-ups slowing down{" "}
-                <IconTrendingDown className="size-4" />
+                <TrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -139,9 +139,9 @@ export async function SectionCards() {
               }`}
             >
               {RSVPCount > previousRSVPCount ? (
-                <IconTrendingUp />
+                <TrendingUp />
               ) : (
-                <IconTrendingDown />
+                <TrendingDown />
               )}
               {getPercentageChange(previousRSVPCount, RSVPCount)}%
             </Badge>
@@ -152,12 +152,12 @@ export async function SectionCards() {
             {RSVPCount > previousRSVPCount ? (
               <>
                 Event participation on the rise{" "}
-                <IconTrendingUp className="size-4" />
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
                 Fewer RSVPs across events{" "}
-                <IconTrendingDown className="size-4" />
+                <TrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -185,9 +185,9 @@ export async function SectionCards() {
               }`}
             >
               {engagementRate > previousEngagementRate ? (
-                <IconTrendingUp />
+                <TrendingUp />
               ) : (
-                <IconTrendingDown />
+                <TrendingDown />
               )}
               {getPercentageChange(previousEngagementRate, engagementRate)}%
             </Badge>
@@ -198,12 +198,12 @@ export async function SectionCards() {
             {engagementRate > previousEngagementRate ? (
               <>
                 Audience interactions increasing{" "}
-                <IconTrendingUp className="size-4" />
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
                 Lower engagement on recent posts{" "}
-                <IconTrendingDown className="size-4" />
+                <TrendingDown className="size-4" />
               </>
             )}
           </div>
