@@ -229,6 +229,8 @@ export default function ClubFormPage() {
           />
         </div>
 
+      
+
         <button
           type="submit"
           disabled={submitting}
