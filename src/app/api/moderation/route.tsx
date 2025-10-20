@@ -19,6 +19,51 @@ function addWeeks(date: Date, weeks: number) {
   return d;
 }
 
+// Helper function to post event to Discord
+async function postEventToDiscord(event: any) {
+  try {
+    // Find the club that owns this event
+    const sb = supabaseAdmin();
+    const { data: club } = await sb
+      .from("clubs")
+      .select("discord_channel_id")
+      .eq("name", event.club_name)
+      .maybeSingle();
+
+    if (!club?.discord_channel_id) {
+      console.log(`No Discord channel configured for club: ${event.club_name}`);
+      return;
+    }
+
+    // Format the event message
+    const start = new Date(event.start_time);
+    const when = `📅 ${start.toLocaleString()}`;
+    const lines = [
+      `**${event.title || "New Event"}**`,
+      event.description ? `\n${event.description}` : "",
+      event.location ? `\n📍 ${event.location}` : "",
+      when ? `\n${when}` : "",
+    ];
+    const content = lines.join("");
+
+    // Post to Discord
+    const response = await fetch(`https://discord.com/api/v10/channels/${club.discord_channel_id}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN!}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to post to Discord:", await response.text());
+    }
+  } catch (error) {
+    console.error("Error posting to Discord:", error);
+  }
+}
+
 // GET: list all pending events
 export async function GET() {
   try {
@@ -72,6 +117,9 @@ export async function POST(req: Request) {
         .eq("id", id);
       if (updErr) throw updErr;
 
+      // Post to Discord for the original event
+      await postEventToDiscord(ev);
+
       // 2) Insert FUTURE weekly occurrences (start at +1 week)
       const inserts: Array<Record<string, any>> = [];
       for (let d = addWeeks(start, 1); d <= until; d = addWeeks(d, 1)) {
@@ -102,6 +150,11 @@ export async function POST(req: Request) {
         .update({ status: newStatus })
         .eq("id", id);
       if (updErr) throw updErr;
+
+      // Post to Discord if approved
+      if (newStatus === "approved") {
+        await postEventToDiscord(ev);
+      }
     }
 
     return new NextResponse("OK", { status: 200 });

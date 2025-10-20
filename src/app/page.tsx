@@ -1,9 +1,15 @@
-// src/app/page.tsx
+/*
+  This is the main landing page, showing upcoming and past events.
+*/
+
+// because by default Next.js caches pages, we need to disable caching to see live data
 export const revalidate = 0; // don't cache this page
 export const dynamic = "force-dynamic"; // force dynamic rendering
 
-import { supabaseBrowser } from "./lib/supabase";
+import { getSupabaseClient } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
+import ClubBanner from "./components/ClubBanner";
+import SignOutButton from "./components/SignOutButton";
 import Hero from "./components/Hero/Hero";
 import EventCard from "./components/EventList/EventCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,17 +30,17 @@ function fmtDate(iso: string) {
 }
 
 export default async function Home() {
-  const sb = supabaseBrowser();
+  const supabase = getSupabaseClient();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
 
-  const { data: upcoming, error: errUpcoming } = await sb
+  const { data: upcoming, error: errUpcoming } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
     .gte("start_time", nowIso)
     .order("start_time", { ascending: true });
 
-  const { data: past, error: errPast } = await sb
+  const { data: past, error: errPast } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
@@ -42,7 +48,7 @@ export default async function Home() {
     .order("start_time", { ascending: false })
     .limit(10);
 
-  const { data: today, error: errToday } = await sb
+  const { data: today, error: errToday } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
@@ -106,11 +112,14 @@ export default async function Home() {
     interests: ["Art", "Business", "STEM", "Sports", "Music", "Dance", "Theater", "Film", "Literature", "Writing", "Photography"], // 12 interests
   }
 
+
   return (
     <main className="">
       <NavBar user={user}/>
       <Hero user={user} />
       <PreviewBanner />
+      <ClubBanner/>
+      <SignOutButton/>
       <div className="flex justify-center px-20 gap-8">
         <div className="">
           <Tabs
