@@ -25,7 +25,7 @@ function fmtDate(iso: string) {
 export default async function Home() {
   const sb = supabaseBrowser();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
-  const userType = "student";
+  const userType = "club";
 
   const { data: upcoming, error: errUpcoming } = await sb
     .from("events")
@@ -108,10 +108,10 @@ export default async function Home() {
         <div className="">
           <Tabs
             defaultValue="upcoming"
-            className="flex flex-col items-center xl:items-start justify-center gap-8"
+            className="flex flex-col items-center xl:items-start justify-center gap-0"
           >
             {/* Today's Events (Mobile) */}
-            <Card className="xl:hidden w-xl h-min">
+            <Card className="xl:hidden w-xl h-min mb-4">
               <CardTitle className="px-6">
                 <h1>Events Today</h1>
               </CardTitle>
@@ -128,8 +128,9 @@ export default async function Home() {
                   ))}
               </CardContent>
             </Card>
-            <div className="flex justify-center xl:justify-start">
-              <TabsList className="">
+            {/* Tabs */}
+            <div className="flex-col justify-center items-center xl:justify-start">
+              <TabsList className="mb-4">
                 <TabsTrigger value="upcoming" className="cursor-pointer ">
                   Upcoming Events
                 </TabsTrigger>
@@ -138,27 +139,28 @@ export default async function Home() {
                 </TabsTrigger>
               </TabsList>
             </div>
+
             <div className="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-8">
               {/* Event List */}
-              <TabsContent
-                value="upcoming"
-                className={`grid grid-cols-2 2xl:grid-cols-3 gap-8`}
-              >
-                {upcoming
-                  .map((event) => toEventItem(event))
-                  .map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
+              <TabsContent value="upcoming">
+                <p className="text-muted-foreground text-center xl:text-left mb-4">{upcoming.length} results</p>
+                <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
+                  {upcoming
+                    .map((event) => toEventItem(event))
+                    .map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                </div>
               </TabsContent>
-              <TabsContent
-                value="past"
-                className={`grid grid-cols-2 2xl:grid-cols-3 gap-8`}
-              >
-                {past
+              <TabsContent value="past">
+                <p className="text-muted-foreground text-center xl:text-left mb-4">{past.length} results</p>
+                <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
+                  {past
                   .map((event) => toEventItem(event))
                   .map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
+                </div>
               </TabsContent>
               {/* Today's Events (Desktop) */}
               <Card className="xl:flex xl:flex-col hidden w-sm h-min gap-4">
