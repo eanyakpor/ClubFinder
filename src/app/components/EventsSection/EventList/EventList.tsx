@@ -1,4 +1,4 @@
-import EventCard from "../EventList/EventCard";
+import EventCard from "./EventCard";
 import { toEventItem } from "@/lib/eventsClient";
 
 interface EventGridProps {

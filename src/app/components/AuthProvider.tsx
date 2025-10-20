@@ -1,18 +1,21 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getSupabaseClient } from "../lib/supabase";
 import NavBar from "./NavBar/NavBar";
 import type { User } from "@supabase/supabase-js";
+import { getCurrentUser } from "../lib/auth-actions";
+import { getAuthStateListener } from "../lib/supabase-client-minimal";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  refreshUser: async () => {},
 });
 
 export const useAuth = () => {
@@ -25,26 +28,39 @@ export const useAuth = () => {
 
 interface AuthProviderProps {
   children: React.ReactNode;
+  initialUser?: User | null;
 }
 
-export default function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function AuthProvider({ children, initialUser = null }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [loading, setLoading] = useState(!initialUser);
+
+  const refreshUser = async () => {
+    setLoading(true);
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
+    const authListener = getAuthStateListener();
     
-    // Get initial session
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
+    // Get initial session if no initial user provided
+    if (!initialUser) {
+      authListener.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+    }
 
-    getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    // Listen for auth state changes
+    const { data: { subscription } } = authListener.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
@@ -52,10 +68,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     );
 
     return () => subscription.unsubscribe();
-  }, []); // Empty dependency array since supabase is now a singleton
+  }, [initialUser]);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser }}>
       <NavBar user={user} />
       {children}
     </AuthContext.Provider>

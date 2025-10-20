@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TodayEventsCard from "./TodayEventsCard";
-import EventGrid from "./EventGrid";
+import EventGrid from "./EventList/EventList";
 
 interface EventsSectionProps {
   upcoming: any[];
