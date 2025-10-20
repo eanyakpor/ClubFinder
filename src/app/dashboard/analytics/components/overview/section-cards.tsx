@@ -1,4 +1,4 @@
-import {TrendingUp, TrendingDown} from "lucide-react"
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,11 +34,8 @@ export async function SectionCards() {
       {/* Total Reach/Impressions */}
 
       <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Total Reach/Impressions</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {totalReach.toLocaleString()}
-          </CardTitle>
+        <CardHeader className="">
+          <CardTitle className="">Total Reach/Impressions</CardTitle>
           <CardAction>
             <Badge
               variant="outline"
@@ -57,6 +54,9 @@ export async function SectionCards() {
             </Badge>
           </CardAction>
         </CardHeader>
+        <CardDescription className="px-6 text-2xl font-semibold text-card-foreground">
+          {totalReach.toLocaleString()}
+        </CardDescription>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
             {totalReach > previousTotalReach ? (
@@ -80,11 +80,8 @@ export async function SectionCards() {
       {/* New Members */}
 
       <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>New Members</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {newMembers.toLocaleString()}
-          </CardTitle>
+        <CardHeader className="">
+          <CardTitle className="">New Members</CardTitle>
           <CardAction>
             <Badge
               variant="outline"
@@ -103,17 +100,18 @@ export async function SectionCards() {
             </Badge>
           </CardAction>
         </CardHeader>
+        <CardDescription className="px-6 text-2xl font-semibold text-card-foreground">
+          {newMembers.toLocaleString()}
+        </CardDescription>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
             {newMembers > previousNewMembers ? (
               <>
-                Membership growth increasing{" "}
-                <TrendingUp className="size-4" />
+                Membership growth increasing <TrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Member sign-ups slowing down{" "}
-                <TrendingDown className="size-4" />
+                Member sign-ups slowing down <TrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -124,11 +122,8 @@ export async function SectionCards() {
       {/* RSVP Count */}
 
       <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>RSVP Count</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {RSVPCount.toLocaleString()}
-          </CardTitle>
+        <CardHeader className="">
+          <CardTitle className="">RSVP Count</CardTitle>
           <CardAction>
             <Badge
               variant="outline"
@@ -147,17 +142,18 @@ export async function SectionCards() {
             </Badge>
           </CardAction>
         </CardHeader>
+        <CardDescription className="px-6 text-2xl font-semibold text-card-foreground">
+          {RSVPCount.toLocaleString()}
+        </CardDescription>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
             {RSVPCount > previousRSVPCount ? (
               <>
-                Event participation on the rise{" "}
-                <TrendingUp className="size-4" />
+                Event participation on the rise <TrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Fewer RSVPs across events{" "}
-                <TrendingDown className="size-4" />
+                Fewer RSVPs across events <TrendingDown className="size-4" />
               </>
             )}
           </div>
@@ -170,11 +166,8 @@ export async function SectionCards() {
       {/* Engagement Rate */}
 
       <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Engagement Rate</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {engagementRate.toFixed(1)}%
-          </CardTitle>
+        <CardHeader className="">
+          <CardTitle className="">Engagement Rate</CardTitle>
           <CardAction>
             <Badge
               variant="outline"
@@ -193,17 +186,18 @@ export async function SectionCards() {
             </Badge>
           </CardAction>
         </CardHeader>
+        <CardDescription className="px-6 text-2xl font-semibold text-card-foreground">
+          {engagementRate.toFixed(1)}%
+        </CardDescription>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
             {engagementRate > previousEngagementRate ? (
               <>
-                Audience interactions increasing{" "}
-                <TrendingUp className="size-4" />
+                Audience interactions increasing <TrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Lower engagement on recent posts{" "}
-                <TrendingDown className="size-4" />
+                Lower engagement on recent posts <TrendingDown className="size-4" />
               </>
             )}
           </div>

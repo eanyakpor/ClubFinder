@@ -3,9 +3,15 @@
 */
 
 import { createClient } from '@supabase/supabase-js'
-    
-    export function getSupabaseClient() {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      return createClient(url, anon);
-    }
+
+// Create a singleton instance
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
+export function getSupabaseClient() {
+  if (!supabaseInstance) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    supabaseInstance = createClient(url, anon);
+  }
+  return supabaseInstance;
+}
