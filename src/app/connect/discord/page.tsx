@@ -16,6 +16,7 @@ export default function ConnectDiscordQuickSelector() {
   const [channelId, setChannelId] = useState<string>("");
 
   const [msg, setMsg] = useState<string>("");
+  const [returnTo, setReturnTo] = useState<string>("/clubform");
 
   // read ?clubId=&accessToken= from URL (added by /api/discord/oauth/callback)
   useEffect(() => {
@@ -24,11 +25,12 @@ export default function ConnectDiscordQuickSelector() {
     const t = url.searchParams.get("accessToken");
     const err = url.searchParams.get("err");
     const detail = url.searchParams.get("detail");
-    const returnTo = url.searchParams.get("return_to") || "/clubform";
-    
+    const rt = url.searchParams.get("return_to") || "/clubform";
+    setReturnTo(rt);
+
     if (c) setClubId(c);
     if (t) setAccessToken(t);
-    
+
     // Handle OAuth errors
     if (err) {
       if (err === "missing_code") {
@@ -102,10 +104,8 @@ export default function ConnectDiscordQuickSelector() {
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || "Save failed");
       setMsg("✅ Saved! You can close this and submit your event.");
-      
+
       // Auto-redirect to return URL after 2 seconds
-      const url = new URL(window.location.href);
-      const returnTo = url.searchParams.get("return_to") || "/clubform";
       setTimeout(() => {
         window.location.href = returnTo;
       }, 2000);
@@ -200,10 +200,10 @@ export default function ConnectDiscordQuickSelector() {
       )}
 
       {msg && <p className="text-sm mt-4">{msg}</p>}
-      
+
       <div className="mt-6 text-center">
         <a 
-          href={new URL(window.location.href).searchParams.get("return_to") || "/clubform"} 
+          href={returnTo}
           className="text-sm text-blue-600 hover:text-blue-800 underline"
         >
           ← Back to Club Form
