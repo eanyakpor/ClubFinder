@@ -1,12 +1,12 @@
 import React from "react";
-import SearchBar from "./SearchBar";
-import RecommendationTags from "./RecommendationTags";
-import NavigationButtons from "./NavigationButtons";
+import SearchBar from "./components/SearchBar";
+import RecommendationTags from "./components/RecommendationTags";
+import NavigationButtons from "./components/NavigationButtons";
 
-function Hero({ userType }: { userType: "student" | "club" }) {
+function Hero({ user }: { user: { name: string; isClub: boolean; interests: string[] } }) {
   return (
     <div className="flex flex-col justify-center items-center gap-8 p-8 h-96">
-      {userType === "club" ? (
+      {user.isClub ? (
         <>
         <h1 className="text-center text-3xl md:text-5xl lg:text-6xl font-bold">
           Your Hub For Events,
@@ -23,7 +23,7 @@ function Hero({ userType }: { userType: "student" | "club" }) {
             Connections, All in One Place.
           </h1>
           <SearchBar />
-          <RecommendationTags />
+          <RecommendationTags tags={user.interests}/>
         </>
       )}
     </div>

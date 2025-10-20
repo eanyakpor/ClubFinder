@@ -9,6 +9,7 @@ import EventCard from "./components/EventList/EventCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventItem } from "./lib/data";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import NavBar from "./components/NavBar/NavBar";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -25,7 +26,6 @@ function fmtDate(iso: string) {
 export default async function Home() {
   const sb = supabaseBrowser();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
-  const userType = "club";
 
   const { data: upcoming, error: errUpcoming } = await sb
     .from("events")
@@ -100,9 +100,16 @@ export default async function Home() {
 
   console.log(upcoming[0]); // For debugging
 
+  const user = {
+    name: "John Doe",
+    isClub: true,
+    interests: ["Art", "Business", "STEM", "Sports", "Music", "Dance", "Theater", "Film", "Literature", "Writing", "Photography"], // 12 interests
+  }
+
   return (
     <main className="">
-      <Hero userType={userType} />
+      <NavBar user={user}/>
+      <Hero user={user} />
       <PreviewBanner />
       <div className="flex justify-center px-20 gap-8">
         <div className="">
@@ -111,7 +118,7 @@ export default async function Home() {
             className="flex flex-col items-center xl:items-start justify-center gap-0"
           >
             {/* Today's Events (Mobile) */}
-            <Card className="xl:hidden w-xl h-min mb-4">
+            <Card className=" xl:hidden w-[350px] md:w-md xl:w-xl h-min mb-4">
               <CardTitle className="px-6">
                 <h1>Events Today</h1>
               </CardTitle>
@@ -143,7 +150,6 @@ export default async function Home() {
             <div className="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-8">
               {/* Event List */}
               <TabsContent value="upcoming">
-                <p className="text-muted-foreground text-center xl:text-left mb-4">{upcoming.length} results</p>
                 <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
                   {upcoming
                     .map((event) => toEventItem(event))
@@ -153,7 +159,6 @@ export default async function Home() {
                 </div>
               </TabsContent>
               <TabsContent value="past">
-                <p className="text-muted-foreground text-center xl:text-left mb-4">{past.length} results</p>
                 <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
                   {past
                   .map((event) => toEventItem(event))
