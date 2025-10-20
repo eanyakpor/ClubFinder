@@ -51,8 +51,6 @@ export async function getUpcomingEvents(clubName?: string) {
 
   const { data, error } = await query;
 
-  console.log("data", data);
-
   if (error) {
     throw new Error(error.message);
   }

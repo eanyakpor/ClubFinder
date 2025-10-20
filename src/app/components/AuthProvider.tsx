@@ -3,8 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import NavBar from "./NavBar/NavBar";
 import type { User } from "@supabase/supabase-js";
-import { getCurrentUser } from "../lib/auth-actions";
-import { getAuthStateListener } from "../lib/supabase-client-minimal";
+import { getSupabaseClient } from "../lib/supabase";
 
 interface AuthContextType {
   user: User | null;
@@ -38,8 +37,9 @@ export default function AuthProvider({ children, initialUser = null }: AuthProvi
   const refreshUser = async () => {
     setLoading(true);
     try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      const supabase = getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);
@@ -49,19 +49,21 @@ export default function AuthProvider({ children, initialUser = null }: AuthProvi
   };
 
   useEffect(() => {
-    const authListener = getAuthStateListener();
+    const supabase = getSupabaseClient();
     
     // Get initial session if no initial user provided
     if (!initialUser) {
-      authListener.getSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log('Initial session check:', { session });
         setUser(session?.user ?? null);
         setLoading(false);
       });
     }
 
     // Listen for auth state changes
-    const { data: { subscription } } = authListener.onAuthStateChange(
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', { event, user: session?.user });
         setUser(session?.user ?? null);
         setLoading(false);
       }
