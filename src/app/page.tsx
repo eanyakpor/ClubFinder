@@ -8,6 +8,7 @@ import Hero from "./components/Hero/Hero";
 import EventCard from "./components/EventList/EventCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventItem } from "./lib/data";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -24,7 +25,7 @@ function fmtDate(iso: string) {
 export default async function Home() {
   const sb = supabaseBrowser();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
-  const userType = "club";
+  const userType = "student";
 
   const { data: upcoming, error: errUpcoming } = await sb
     .from("events")
@@ -41,6 +42,13 @@ export default async function Home() {
     .order("start_time", { ascending: false })
     .limit(10);
 
+  const { data: today, error: errToday } = await sb
+    .from("events")
+    .select("id, title, club_name, location, start_time, description")
+    .eq("status", "approved")
+    .eq("start_time", nowIso)
+    .order("start_time", { ascending: true });
+
   const toEventItem = (event: any): EventItem => {
     return {
       id: event.id,
@@ -52,45 +60,127 @@ export default async function Home() {
     };
   };
 
-  if (errUpcoming || errPast) {
+  if (errUpcoming || errPast || errToday) {
     return (
       <main className="mx-auto max-w-5xl p-8 text-black">
         <div className="rounded-3xl border-2 border-black bg-white p-6 text-red-600">
-          {errUpcoming?.message || errPast?.message}
+          {errUpcoming?.message || errPast?.message || errToday?.message}
         </div>
       </main>
     );
   }
 
-  console.log(upcoming[0]);
+  // Mock data for today
+  if (today.length === 0) {
+    today.push({
+      id: "1",
+      title: "NextGen Hacks",
+      club_name: "Society of Software Engineers",
+      start_time: nowIso,
+      location: "California State University, Northridge",
+      description: "Description 1",
+    });
+    today.push({
+      id: "1",
+      title: "NextGen Hacks",
+      club_name: "Society of Software Engineers",
+      start_time: nowIso,
+      location: "California State University, Northridge",
+      description: "Description 1",
+    });
+    today.push({
+      id: "1",
+      title: "NextGen Hacks",
+      club_name: "Society of Software Engineers",
+      start_time: nowIso,
+      location: "California State University, Northridge",
+      description: "Description 1",
+    });
+  }
+
+  console.log(upcoming[0]); // For debugging
 
   return (
     <main className="">
       <Hero userType={userType} />
       <PreviewBanner />
-      <div className="px-20">
-        <Tabs defaultValue="upcoming" className="gap-8">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
-            <TabsTrigger value="past">Past Events</TabsTrigger>
-          </TabsList>
-          <TabsContent
-            value="upcoming"
-            className="flex flex-wrap gap-8"
+      <div className="flex justify-center px-20 gap-8">
+        <div className="">
+          <Tabs
+            defaultValue="upcoming"
+            className="flex flex-col items-center xl:items-start justify-center gap-8"
           >
-            {upcoming.map((event) => toEventItem(event)).map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </TabsContent>
-          <TabsContent
-            value="past"
-            className="flex flex-wrap gap-8"
-          >
-            {past.map((event) => toEventItem(event)).map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </TabsContent>
-        </Tabs>
+            {/* Today's Events (Mobile) */}
+            <Card className="xl:hidden w-xl h-min">
+              <CardTitle className="px-6">
+                <h1>Events Today</h1>
+              </CardTitle>
+              <CardContent className="flex flex-col gap-4">
+                {today
+                  .map((event) => toEventItem(event))
+                  .map((event) => (
+                    <Card className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200">
+                      <CardTitle className="px-6">{event.club}</CardTitle>
+                      <CardContent className="px-6 text-muted-foreground">
+                        {event.title}
+                      </CardContent>
+                    </Card>
+                  ))}
+              </CardContent>
+            </Card>
+            <div className="flex justify-center xl:justify-start">
+              <TabsList className="">
+                <TabsTrigger value="upcoming" className="cursor-pointer ">
+                  Upcoming Events
+                </TabsTrigger>
+                <TabsTrigger value="past" className="cursor-pointer ">
+                  Past Events
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-8">
+              {/* Event List */}
+              <TabsContent
+                value="upcoming"
+                className={`grid grid-cols-2 2xl:grid-cols-3 gap-8`}
+              >
+                {upcoming
+                  .map((event) => toEventItem(event))
+                  .map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+              </TabsContent>
+              <TabsContent
+                value="past"
+                className={`grid grid-cols-2 2xl:grid-cols-3 gap-8`}
+              >
+                {past
+                  .map((event) => toEventItem(event))
+                  .map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+              </TabsContent>
+              {/* Today's Events (Desktop) */}
+              <Card className="xl:flex xl:flex-col hidden w-sm h-min gap-4">
+                <CardTitle className="px-6">
+                  <h1>Events Today</h1>
+                </CardTitle>
+                <CardContent className="flex flex-col gap-4">
+                  {today
+                    .map((event) => toEventItem(event))
+                    .map((event) => (
+                      <Card className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200">
+                        <CardTitle className="px-6">{event.club}</CardTitle>
+                        <CardContent className="px-6 text-muted-foreground">
+                          {event.title}
+                        </CardContent>
+                      </Card>
+                    ))}
+                </CardContent>
+              </Card>
+            </div>
+          </Tabs>
+        </div>
       </div>
 
       <footer className="mt-12 text-center text-sm text-gray-500">
