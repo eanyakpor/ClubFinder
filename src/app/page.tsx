@@ -3,9 +3,6 @@
 */
 
 // because by default Next.js caches pages, we need to disable caching to see live data
-
-export const revalidate = 0;            // don't cache this page
-// src/app/page.tsx
 export const revalidate = 0; // don't cache this page
 export const dynamic = "force-dynamic"; // force dynamic rendering
 
@@ -51,7 +48,7 @@ export default async function Home() {
     .order("start_time", { ascending: false })
     .limit(10);
 
-  const { data: today, error: errToday } = await sb
+  const { data: today, error: errToday } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
@@ -123,62 +120,6 @@ export default async function Home() {
       <PreviewBanner />
       <ClubBanner/>
       <SignOutButton/>
-      <section className="mb-12">
-        <h1 className="mb-6 text-4xl font-extrabold tracking-tight">Upcoming Events</h1>
-
-        {!upcoming?.length ? (
-          <div className="rounded-3xl border-2 border-black bg-white p-8">
-            <p className="text-lg text-gray-600">No upcoming events yet.</p>
-          </div>
-        ) : (
-          <ul className="space-y-6">
-            {upcoming.map((e) => (
-              <li key={e.id}>
-                <article className="rounded-2xl border bg-white p-4 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900">{e.club_name}</h3>
-                  <p className="text-lg text-gray-600 italic">{e.title}</p>
-                  <p className="mt-1 text-lg text-gray-700">
-                    {fmtDate(e.start_time)}
-                    {e.location ? ` • ${e.location}` : ""}
-                  </p>
-                  {e.description && (
-                    <p className="mt-2 text-lg text-gray-600">{e.description}</p>
-                  )}
-                </article>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* PAST */}
-      <section>
-        <h2 className="mb-6 text-3xl font-extrabold tracking-tight">Past Events</h2>
-
-        {!past?.length ? (
-          <div className="rounded-3xl border-2 border-black bg-white p-8">
-            <p className="text-lg text-gray-600">No past events.</p>
-          </div>
-        ) : (
-          <ul className="space-y-6">
-            {past.map((e) => (
-              <li key={e.id}>
-                <article className="rounded-3xl border-2 border-black bg-white p-7">
-                  <h3 className="text-2xl font-extrabold leading-snug">{e.club_name}</h3>
-                  <p className="text-lg text-gray-600 italic">{e.title}</p>
-                  <p className="mt-3 text-base text-gray-700">
-                    {fmtDate(e.start_time)}
-                    {e.location ? ` • ${e.location}` : ""}
-                  </p>
-                  {e.description && (
-                    <p className="mt-4 text-base leading-relaxed text-gray-700">{e.description}</p>
-                  )}
-                </article>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
       <div className="flex justify-center px-20 gap-8">
         <div className="">
           <Tabs
