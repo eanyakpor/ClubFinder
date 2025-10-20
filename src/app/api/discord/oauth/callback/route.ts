@@ -5,8 +5,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const code  = url.searchParams.get("code");
   const state = url.searchParams.get("state") || ""; // your clubId
+  const returnTo = url.searchParams.get("return_to") || "/clubform";
   if (!code) {
-    const u = new URL("/connect/discord?err=missing_code", new URL(req.url).origin);
+    const u = new URL(`/connect/discord?err=missing_code&return_to=${encodeURIComponent(returnTo)}`, new URL(req.url).origin);
     return NextResponse.redirect(u.toString());
   }
 
@@ -34,6 +35,7 @@ export async function GET(req: Request) {
   const qs = new URLSearchParams({
     clubId: state,
     accessToken: token.access_token || "",
+    return_to: returnTo,
   });
 
   {

@@ -1,10 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+/*
+  Supabase client setup for browser environment
+*/
 
-export const supabaseBrowser = () =>
-    createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!
-    );
+import { createClient } from '@supabase/supabase-js'
     
     export function getSupabaseClient() {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;

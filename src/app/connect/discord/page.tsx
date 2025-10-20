@@ -24,6 +24,7 @@ export default function ConnectDiscordQuickSelector() {
     const t = url.searchParams.get("accessToken");
     const err = url.searchParams.get("err");
     const detail = url.searchParams.get("detail");
+    const returnTo = url.searchParams.get("return_to") || "/clubform";
     
     if (c) setClubId(c);
     if (t) setAccessToken(t);
@@ -102,9 +103,11 @@ export default function ConnectDiscordQuickSelector() {
       if (!r.ok) throw new Error(data?.error || "Save failed");
       setMsg("✅ Saved! You can close this and submit your event.");
       
-      // Auto-redirect to club form after 2 seconds
+      // Auto-redirect to return URL after 2 seconds
+      const url = new URL(window.location.href);
+      const returnTo = url.searchParams.get("return_to") || "/clubform";
       setTimeout(() => {
-        window.location.href = "/clubform";
+        window.location.href = returnTo;
       }, 2000);
     } catch (e: any) {
       setMsg(e.message || "Save failed");
@@ -200,7 +203,7 @@ export default function ConnectDiscordQuickSelector() {
       
       <div className="mt-6 text-center">
         <a 
-          href="/clubform" 
+          href={new URL(window.location.href).searchParams.get("return_to") || "/clubform"} 
           className="text-sm text-blue-600 hover:text-blue-800 underline"
         >
           ← Back to Club Form

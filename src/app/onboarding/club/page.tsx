@@ -85,10 +85,8 @@ export default function ClubOnboardingPage() {
       }
 
       const clubId = upserted.id as string;
-
-      // 4) Redirect straight into Discord OAuth (quick selector flow will follow)
-      const oauthStart = `/api/discord/oauth/start?state=${encodeURIComponent(clubId)}`;
-      window.location.href = oauthStart;
+      // Redirect to Social Media dashboard instead of starting Discord OAuth here
+      window.location.href = "/SocialMediaDashboard";
     } catch (err: any) {
       console.error("onboarding save error:", err);
       setMessage("Error saving club info. Please try again.");

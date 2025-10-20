@@ -1,10 +1,16 @@
-// src/app/page.tsx
+/*
+  This is the main landing page, showing upcoming and past events.
+*/
+
+// because by default Next.js caches pages, we need to disable caching to see live data
+
 export const revalidate = 0;            // don't cache this page
 export const dynamic = "force-dynamic"; // force dynamic rendering
 
-import { supabaseBrowser } from "./lib/supabase";
+import { getSupabaseClient } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
 import ClubBanner from "./components/ClubBanner";
+import SignOutButton from "./components/SignOutButton";
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -19,17 +25,17 @@ function fmtDate(iso: string) {
 }
 
 export default async function Home() {
-  const sb = supabaseBrowser();
+  const supabase = getSupabaseClient();
   const nowIso = new Date().toISOString(); // compare in UTC (DB stores UTC)
 
-  const { data: upcoming, error: errUpcoming } = await sb
+  const { data: upcoming, error: errUpcoming } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
     .gte("start_time", nowIso)
     .order("start_time", { ascending: true });
 
-  const { data: past, error: errPast } = await sb
+  const { data: past, error: errPast } = await supabase
     .from("events")
     .select("id, title, club_name, location, start_time, description")
     .eq("status", "approved")
@@ -47,10 +53,12 @@ export default async function Home() {
     );
   }
 
+
   return (
     <main className="mx-auto max-w-5xl p-8 text-black">
       <PreviewBanner />
       <ClubBanner/>
+      <SignOutButton/>
       <section className="mb-12">
         <h1 className="mb-6 text-4xl font-extrabold tracking-tight">Upcoming Events</h1>
 

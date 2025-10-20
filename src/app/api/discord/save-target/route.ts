@@ -18,14 +18,31 @@ export async function POST(req: Request) {
   try {
     const sb = supabaseAdmin();
 
-    // Optional: ensure the club exists before updating
+    // Validate club exists and belongs to authenticated user
     const { data: club, error: fetchErr } = await sb
       .from("clubs")
-      .select("id")
+      .select("id, owner_user_id")
       .eq("id", clubId)
       .maybeSingle();
     if (fetchErr) throw fetchErr;
     if (!club) return NextResponse.json({ error: "club_not_found" }, { status: 404 });
+
+    // Get user from Authorization header
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
+    const token = authHeader.slice(7);
+    const { data: { user }, error: userErr } = await sb.auth.getUser(token);
+    if (userErr || !user) {
+      return NextResponse.json({ error: "invalid_token" }, { status: 401 });
+    }
+
+    // Verify user owns this club
+    if (club.owner_user_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
 
     const { error } = await sb
       .from("clubs")

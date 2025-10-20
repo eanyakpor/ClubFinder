@@ -60,10 +60,24 @@ export default function ClubFormPage() {
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
       if (userErr) {
         console.error("[clubform] getUser error:", userErr);
+        setErr("Authentication error. Please log in again.");
         return;
       }
       if (!user) {
-        console.log("[clubform] no user; not fetching club");
+        console.log("[clubform] no user; redirecting to login");
+        window.location.href = "/login";
+        return;
+      }
+
+      // Check if user has club role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (profile?.role !== "club") {
+        setErr("This page is only for club accounts. Please log in with a club account.");
         return;
       }
 
@@ -320,33 +334,50 @@ export default function ClubFormPage() {
         <div className="border-t pt-4">
           <h3 className="text-sm font-medium mb-2">Post this event to Discord?</h3>
           <p className="text-xs text-gray-600 mb-3">
-            Step 1: Invite the bot to your server. Step 2: Sign in with Discord to choose where to post.
+            Connect your Discord server to enable automatic event posting.
           </p>
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <ConnectToDiscordButton />
-            {needsClubOnboarding ? (
-              <a href="/onboarding/club" className="px-3 py-2 rounded border">
+          
+          {needsClubOnboarding ? (
+            <div className="flex items-center gap-2">
+              <a href="/onboarding/club" className="px-3 py-2 rounded border text-sm">
                 Create your club first
               </a>
-            ) : clubId ? (
-              <AddDiscordIntegration clubId={clubId} />
-            ) : (
-              <span className="text-sm text-gray-600">Sign in to your account to link Discord.</span>
-            )}
-          </div>
-          
-          {discordConnected && (
+            </div>
+          ) : !discordConnected ? (
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="post_to_discord"
-                checked={form.post_to_discord || false}
-                onChange={(e) => onChange("post_to_discord", e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="post_to_discord" className="text-sm font-medium">
-                Post this event to Discord
-              </label>
+              <a 
+                href="/SocialMediaDashboard" 
+                className="px-4 py-2 rounded bg-[#5865F2] text-white text-sm hover:opacity-90"
+              >
+                Connect Discord
+              </a>
+              <span className="text-xs text-gray-500">
+                Set up Discord integration to enable posting
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="post_to_discord"
+                  checked={form.post_to_discord || false}
+                  onChange={(e) => onChange("post_to_discord", e.target.checked)}
+                  className="rounded"
+                />
+                <label htmlFor="post_to_discord" className="text-sm font-medium">
+                  Post this event to Discord
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-green-600">✓ Discord connected</span>
+                <a 
+                  href="/SocialMediaDashboard" 
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Manage settings
+                </a>
+              </div>
             </div>
           )}
         </div>
