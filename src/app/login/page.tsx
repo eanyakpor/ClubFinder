@@ -5,9 +5,9 @@
 'use client'
 import { useState, useEffect } from "react";
 import { getSupabaseClient } from "../lib/supabase";
-import { Auth }  from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { NextResponse } from "next/server";
+// import { Auth }  from '@supabase/auth-ui-react';
+// import { ThemeSupa } from '@supabase/auth-ui-shared';
+// import { NextResponse } from "next/server";
 
 // creating a supabase client 
 const supabase = getSupabaseClient();
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
     const checkUserRole = async () => {
         if (session?.user) {
-            const { data: profile } = await supabase
+            const { data: profile }: { data: { role: string } | null } = await supabase
                 .from("profiles")
                 .select("role")
                 .eq("user_id", session.user.id)
