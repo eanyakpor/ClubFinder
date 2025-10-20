@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 type Guild = { id: string; name: string; icon?: string | null };
 type Channel = { id: string; name: string; type: number };
@@ -96,9 +102,18 @@ export default function ConnectDiscordQuickSelector() {
     setMsg("");
     setLoading(true);
     try {
+      // Get the current Supabase session token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        throw new Error("Please log in again to save Discord settings.");
+      }
+
       const r = await fetch("/api/discord/save-target", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ clubId, guildId, channelId }),
       });
       const data = await r.json();
@@ -106,6 +121,8 @@ export default function ConnectDiscordQuickSelector() {
       setMsg("✅ Saved! You can close this and submit your event.");
 
       // Auto-redirect to return URL after 2 seconds
+      const url = new URL(window.location.href);
+      const returnTo = url.searchParams.get("return_to") || "/clubform";
       setTimeout(() => {
         window.location.href = returnTo;
       }, 2000);
