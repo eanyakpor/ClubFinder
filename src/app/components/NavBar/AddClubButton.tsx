@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { IS_PREVIEW } from "../lib/config";
+import { IS_PREVIEW } from "../../lib/config";
 
 export default function AddClubButton() {
   if (IS_PREVIEW) return null;
