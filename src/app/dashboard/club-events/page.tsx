@@ -42,10 +42,10 @@ export default function ClubEventsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading club events...</span>
+          <Loader2 className="h-6 w-6 animate-spin text-white" />
+          <span className="text-white">Loading club events...</span>
         </div>
       </div>
     );
@@ -53,16 +53,16 @@ export default function ClubEventsPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span>Please log in to view your club events</span>
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
+        <span className="text-white">Please log in to view your club events</span>
       </div>
     );
   }
 
   if (!eventsData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span>Failed to load events</span>
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
+        <span className="text-white">Failed to load events</span>
       </div>
     );
   }

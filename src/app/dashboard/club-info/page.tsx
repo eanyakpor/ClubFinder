@@ -198,10 +198,10 @@ export default function ClubInfoPage() {
 
   if (loading || fetchingData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading club information...</span>
+          <Loader2 className="h-6 w-6 animate-spin text-white" />
+          <span className="text-white">Loading club information...</span>
         </div>
       </div>
     );
@@ -213,12 +213,12 @@ export default function ClubInfoPage() {
 
   if (!clubData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-5 w-5" />
-              <span>No club found. Please complete club onboarding first.</span>
+              <span>No club found. Please create a club first.</span>
             </div>
           </CardContent>
         </Card>

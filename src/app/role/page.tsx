@@ -44,9 +44,9 @@ export default function RoleSelectionPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in first</h1>
+          <h1 className="text-2xl font-bold mb-4 text-white">Please sign in first</h1>
           <Button onClick={() => router.push("/login")}>Go to Login</Button>
         </div>
       </div>
