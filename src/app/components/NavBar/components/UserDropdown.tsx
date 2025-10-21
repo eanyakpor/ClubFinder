@@ -24,7 +24,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer">
+        <Avatar className="cursor-pointer border-1 border-white">
           <AvatarImage src={user?.user_metadata.picture} />
           <AvatarFallback className="bg-primary text-primary-foreground">
             {user?.user_metadata.name[0]}
