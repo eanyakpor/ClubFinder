@@ -3,31 +3,18 @@
 */
 
 // because by default Next.js caches pages, we need to disable caching to see live data
+
 export const revalidate = 0; // don't cache this page
 export const dynamic = "force-dynamic"; // force dynamic rendering
+
 
 import { getSupabaseClient } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
 import ClubBanner from "./components/ClubBanner";
 import SignOutButton from "./components/SignOutButton";
 import Hero from "./components/Hero/Hero";
-import EventCard from "./components/EventList/EventCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EventItem } from "./lib/data";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import SearchView from "./components/SearchView";
 import NavBar from "./components/NavBar/NavBar";
-
-function fmtDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("en-US", {
-    timeZone: "America/Los_Angeles", // force PST/PDT for display
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
 
 export default async function Home() {
   const supabase = getSupabaseClient();
@@ -48,70 +35,23 @@ export default async function Home() {
     .order("start_time", { ascending: false })
     .limit(10);
 
-  const { data: today, error: errToday } = await supabase
-    .from("events")
-    .select("id, title, club_name, location, start_time, description")
-    .eq("status", "approved")
-    .eq("start_time", nowIso)
-    .order("start_time", { ascending: true });
-
-  const toEventItem = (event: any): EventItem => {
-    return {
-      id: event.id,
-      title: event.title,
-      club: event.club_name,
-      start: event.start_time,
-      location: event.location,
-      tags: event.tags,
-    };
-  };
-
-  if (errUpcoming || errPast || errToday) {
+  if (errUpcoming || errPast) {
     return (
       <main className="mx-auto max-w-5xl p-8 text-black">
         <div className="rounded-3xl border-2 border-black bg-white p-6 text-red-600">
-          {errUpcoming?.message || errPast?.message || errToday?.message}
+          {errUpcoming?.message || errPast?.message}
         </div>
       </main>
     );
   }
 
-  // Mock data for today
-  if (today.length === 0) {
-    today.push({
-      id: "1",
-      title: "NextGen Hacks",
-      club_name: "Society of Software Engineers",
-      start_time: nowIso,
-      location: "California State University, Northridge",
-      description: "Description 1",
-    });
-    today.push({
-      id: "1",
-      title: "NextGen Hacks",
-      club_name: "Society of Software Engineers",
-      start_time: nowIso,
-      location: "California State University, Northridge",
-      description: "Description 1",
-    });
-    today.push({
-      id: "1",
-      title: "NextGen Hacks",
-      club_name: "Society of Software Engineers",
-      start_time: nowIso,
-      location: "California State University, Northridge",
-      description: "Description 1",
-    });
-  }
-
-  console.log(upcoming[0]); // For debugging
-
-  const user = {
+const user = {
     name: "John Doe",
     isClub: true,
     interests: ["Art", "Business", "STEM", "Sports", "Music", "Dance", "Theater", "Film", "Literature", "Writing", "Photography"], // 12 interests
   }
 
+  console.log(upcoming[0]); // For debugging
 
   return (
     <main className="">
@@ -120,84 +60,7 @@ export default async function Home() {
       <PreviewBanner />
       <ClubBanner/>
       <SignOutButton/>
-      <div className="flex justify-center px-20 gap-8">
-        <div className="">
-          <Tabs
-            defaultValue="upcoming"
-            className="flex flex-col items-center xl:items-start justify-center gap-0"
-          >
-            {/* Today's Events (Mobile) */}
-            <Card className=" xl:hidden w-[350px] md:w-md xl:w-xl h-min mb-4">
-              <CardTitle className="px-6">
-                <h1>Events Today</h1>
-              </CardTitle>
-              <CardContent className="flex flex-col gap-4">
-                {today
-                  .map((event) => toEventItem(event))
-                  .map((event) => (
-                    <Card className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200">
-                      <CardTitle className="px-6">{event.club}</CardTitle>
-                      <CardContent className="px-6 text-muted-foreground">
-                        {event.title}
-                      </CardContent>
-                    </Card>
-                  ))}
-              </CardContent>
-            </Card>
-            {/* Tabs */}
-            <div className="flex-col justify-center items-center xl:justify-start">
-              <TabsList className="mb-4">
-                <TabsTrigger value="upcoming" className="cursor-pointer ">
-                  Upcoming Events
-                </TabsTrigger>
-                <TabsTrigger value="past" className="cursor-pointer ">
-                  Past Events
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <div className="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-8">
-              {/* Event List */}
-              <TabsContent value="upcoming">
-                <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
-                  {upcoming
-                    .map((event) => toEventItem(event))
-                    .map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="past">
-                <div className={`grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8`}>
-                  {past
-                  .map((event) => toEventItem(event))
-                  .map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              </TabsContent>
-              {/* Today's Events (Desktop) */}
-              <Card className="xl:flex xl:flex-col hidden w-sm h-min gap-4">
-                <CardTitle className="px-6">
-                  <h1>Events Today</h1>
-                </CardTitle>
-                <CardContent className="flex flex-col gap-4">
-                  {today
-                    .map((event) => toEventItem(event))
-                    .map((event) => (
-                      <Card className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200">
-                        <CardTitle className="px-6">{event.club}</CardTitle>
-                        <CardContent className="px-6 text-muted-foreground">
-                          {event.title}
-                        </CardContent>
-                      </Card>
-                    ))}
-                </CardContent>
-              </Card>
-            </div>
-          </Tabs>
-        </div>
-      </div>
+      <SearchView upcoming_full={upcoming} past_full={past} />
 
       <footer className="mt-12 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} CSUN Club Finder

@@ -330,6 +330,8 @@ export default function ClubFormPage() {
           />
         </div>
 
+      
+
         {/* 👇 Discord section right before Submit */}
         <div className="border-t pt-4">
           <h3 className="text-sm font-medium mb-2">Post this event to Discord?</h3>
