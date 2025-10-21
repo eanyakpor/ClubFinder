@@ -43,16 +43,20 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/">View Events</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/dashboard/analytics">View Dashboard</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/dashboard/club-info">Edit Club Info</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {profile?.profile_type === 'club' && (
+          <>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/">View Events</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/dashboard/analytics">View Dashboard</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/dashboard/club-info">Edit Club Info</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
           Log Out
         </DropdownMenuItem>
