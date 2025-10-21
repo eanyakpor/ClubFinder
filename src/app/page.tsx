@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import HomeHero from "./components/HomeHero";
 import EventsSection from "./components/EventsSection/EventsSection";
@@ -26,6 +26,7 @@ export default function Home() {
     error: null
   });
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -48,6 +49,43 @@ export default function Home() {
     fetchEvents();
   }, []);
 
+  // Filter events based on search query
+  const filteredUpcoming = useMemo(() => {
+    if (!searchQuery.trim()) return eventsData.upcoming;
+    
+    const query = searchQuery.toLowerCase();
+    return eventsData.upcoming.filter(event => 
+      event.title?.toLowerCase().includes(query) ||
+      event.club_name?.toLowerCase().includes(query) ||
+      event.location?.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query)
+    );
+  }, [eventsData.upcoming, searchQuery]);
+
+  const filteredPast = useMemo(() => {
+    if (!searchQuery.trim()) return eventsData.past;
+    
+    const query = searchQuery.toLowerCase();
+    return eventsData.past.filter(event => 
+      event.title?.toLowerCase().includes(query) ||
+      event.club_name?.toLowerCase().includes(query) ||
+      event.location?.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query)
+    );
+  }, [eventsData.past, searchQuery]);
+
+  const filteredToday = useMemo(() => {
+    if (!searchQuery.trim()) return eventsData.today;
+    
+    const query = searchQuery.toLowerCase();
+    return eventsData.today.filter(event => 
+      event.title?.toLowerCase().includes(query) ||
+      event.club_name?.toLowerCase().includes(query) ||
+      event.location?.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query)
+    );
+  }, [eventsData.today, searchQuery]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -62,11 +100,11 @@ export default function Home() {
   return (
     <ProtectedRoute>
       <main className="">
-        <HomeHero />
+        <HomeHero searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <EventsSection 
-          upcoming={eventsData.upcoming} 
-          past={eventsData.past} 
-          today={eventsData.today} 
+          upcoming={filteredUpcoming} 
+          past={filteredPast} 
+          today={filteredToday} 
         />
         {/* <SearchView upcoming_full={eventsData.upcoming} past_full={eventsData.past} /> */}
       </main>
