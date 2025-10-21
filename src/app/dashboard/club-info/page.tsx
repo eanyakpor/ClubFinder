@@ -198,11 +198,9 @@ export default function ClubInfoPage() {
 
   if (loading || fetchingData) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin text-white" />
-          <span className="text-white">Loading club information...</span>
-        </div>
+      <div className="flex gap-2 justify-center min-h-[calc(100vh-56px)]">
+        <Loader2 className="h-6 w-6 animate-spin text-club-foreground" />
+        <span className="text-club-foreground">Loading club information...</span>
       </div>
     );
   }

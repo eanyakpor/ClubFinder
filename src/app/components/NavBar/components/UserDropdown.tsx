@@ -27,7 +27,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer border-1 border-white">
+        <Avatar className="cursor-pointer border-2 border-white">
           <AvatarImage src={user?.user_metadata.picture} />
           <AvatarFallback className="bg-primary text-primary-foreground">
             {user?.user_metadata.name[0]}
@@ -68,6 +68,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           <Moon className="h-4 w-4" /> Dark Mode
           </>)}
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
           Log Out

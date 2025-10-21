@@ -190,6 +190,7 @@ export default function ClubOnboardingPage() {
               placeholder="e.g. Tech Club"
               value={form.name}
               onChange={(e) => onChange("name", e.target.value)}
+              className="border-border"
             />
 
             <Label className="w-full">Official club email <span className="text-red-500">*</span></Label>
@@ -198,24 +199,28 @@ export default function ClubOnboardingPage() {
               type="email"
               value={form.email}
               onChange={(e) => onChange("email", e.target.value)}
+              className="border-border"
             />
             <Label className="w-full">Instagram URL <span className="text-muted-foreground">(optional)</span></Label>
             <Input
               placeholder="e.g. https://www.instagram.com/techclub"
               value={form.instagram}
               onChange={(e) => onChange("instagram", e.target.value)}
+              className="border-border"
             />
             <Label className="w-full">Discord invite <span className="text-muted-foreground">(optional)</span></Label>
             <Input
               placeholder="e.g. https://discord.gg/techclub"
               value={form.discord}
               onChange={(e) => onChange("discord", e.target.value)}
+              className="border-border"
             />
             <Label className="w-full">Website URL <span className="text-muted-foreground">(optional)</span></Label>
             <Input
               placeholder="e.g. https://techclub.com"
               value={form.website}
               onChange={(e) => onChange("website", e.target.value)}
+              className="border-border"
             />
             <Button
               disabled={submitting || !form.name || !form.email}
