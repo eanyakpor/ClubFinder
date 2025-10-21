@@ -10,6 +10,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [hasClub, setHasClub] = useState<boolean | null>(null);
+  const [clubName, setClubName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -100,6 +102,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Function to check if user owns a club
+  const checkClubOwnership = async (userId: string) => {
+    try {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Club check timeout')), 10000)
+      );
+
+      const clubCheckPromise = supabase
+        .from('clubs')
+        .select('id, name')
+        .eq('owner_user_id', userId)
+        .single();
+
+      const { data, error } = await Promise.race([
+        clubCheckPromise,
+        timeoutPromise
+      ]) as any;
+
+      if (error && error.code === 'PGRST116') {
+        // No club found
+        setHasClub(false);
+        setClubName(null);
+      } else if (error && error.message !== 'Club check timeout') {
+        console.error('Error checking club ownership:', error);
+        setHasClub(false);
+        setClubName(null);
+      } else if (data) {
+        // Club found
+        setHasClub(true);
+        setClubName(data.name);
+      }
+    } catch (error) {
+      console.error('Error in checkClubOwnership:', error);
+      setHasClub(false);
+    }
+  };
+
   useEffect(() => {
     // Get initial session and profile
     const getSession = async () => {
@@ -111,10 +150,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Run profile operations but don't let them block loading
           Promise.all([
             ensureProfile(session.user),
-            fetchProfile(session.user.id)
+            fetchProfile(session.user.id),
+            checkClubOwnership(session.user.id)
           ]).catch(error => {
             console.error('Error handling profile:', error);
           });
+        } else {
+          setHasClub(null);
+          setClubName(null);
         }
       } catch (error) {
         console.error('Error getting session:', error);
@@ -135,12 +178,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Don't await these operations to prevent hanging
           Promise.all([
             ensureProfile(session.user),
-            fetchProfile(session.user.id)
+            fetchProfile(session.user.id),
+            checkClubOwnership(session.user.id)
           ]).catch(error => {
             console.error('Error handling profile:', error);
           });
         } else {
           setProfile(null);
+          setHasClub(null);
+          setClubName(null);
         }
         
         setLoading(false);
@@ -191,13 +237,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  // Function to refresh club status (useful after club creation)
+  const refreshClubStatus = async () => {
+    if (user) {
+      await checkClubOwnership(user.id);
+    }
+  };
+
   const value = {
     user,
     profile,
+    hasClub,
+    clubName,
     loading,
     signOut,
     signInWithGoogle,
     updateProfile,
+    refreshClubStatus,
   };
 
   return (

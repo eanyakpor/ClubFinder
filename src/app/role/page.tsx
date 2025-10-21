@@ -19,8 +19,13 @@ export default function RoleSelectionPage() {
     setLoading(true);
     try {
       await updateProfile({ profile_type: role });
-      // Redirect to home after successful role selection
-      router.push('/');
+      
+      // Redirect based on role
+      if (role === 'club') {
+        router.push('/onboarding/discord');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');

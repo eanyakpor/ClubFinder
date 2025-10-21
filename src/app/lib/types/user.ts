@@ -24,10 +24,13 @@ export interface AppUser extends SupabaseUser {
 export interface AuthContextType {
   user: SupabaseUser | null;
   profile: UserProfile | null;
+  hasClub: boolean | null; // null = loading, true = has club, false = no club
+  clubName: string | null; // actual club name from clubs table
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  refreshClubStatus: () => Promise<void>;
 }
 
 // Helper functions for profile_type
@@ -45,6 +48,10 @@ export const hasSelectedRole = (profile: UserProfile | null): boolean => {
 
 export const needsRoleSelection = (profile: UserProfile | null): boolean => {
   return profile?.profile_type === '';
+};
+
+export const needsClubOnboarding = (profile: UserProfile | null, hasClub: boolean | null): boolean => {
+  return profile?.profile_type === 'club' && hasClub === false;
 };
 
 export const getProfileTypeLabel = (profile: UserProfile | null): string => {

@@ -15,7 +15,7 @@ export default function ProtectedRoute({
   redirectTo = "/login",
   requireRole = true // Default to requiring role selection
 }: ProtectedRouteProps) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, hasClub, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,8 +31,14 @@ export default function ProtectedRoute({
         router.push('/role');
         return;
       }
+      
+      // Check if club user needs to complete onboarding
+      if (requireRole && profile && profile.profile_type === 'club' && hasClub === false) {
+        router.push('/onboarding/discord');
+        return;
+      }
     }
-  }, [user, profile, loading, router, redirectTo, requireRole]);
+  }, [user, profile, hasClub, loading, router, redirectTo, requireRole]);
 
   if (loading) {
     return (
@@ -49,6 +55,11 @@ export default function ProtectedRoute({
   // If role is required and user hasn't selected one, redirect to role selection
   if (requireRole && profile && profile.profile_type === '') {
     return null; // Will redirect to /role via useEffect
+  }
+
+  // If club user hasn't completed onboarding, redirect to onboarding
+  if (requireRole && profile && profile.profile_type === 'club' && hasClub === false) {
+    return null; // Will redirect to /onboarding/discord via useEffect
   }
 
   return <>{children}</>;
