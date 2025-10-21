@@ -29,7 +29,9 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowLeft,
+  LinkIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 interface ClubData {
   id: string;
@@ -42,6 +44,8 @@ interface ClubData {
   pitch?: string;
   contact_email?: string;
   is_active: boolean;
+  discord_guild_id?: string;
+  discord_channel_id?: string;
 }
 
 export default function ClubInfoPage() {
@@ -64,6 +68,11 @@ export default function ClubInfoPage() {
     text: string;
   } | null>(null);
   const [fetchingData, setFetchingData] = useState(true);
+
+  // Compute Discord connection status based on guild and channel IDs
+  const discordConnected = Boolean(
+    clubData?.discord_guild_id && clubData?.discord_channel_id
+  );
 
   // Redirect if not authenticated or not a club
   useEffect(() => {
@@ -371,6 +380,28 @@ export default function ClubInfoPage() {
               </div>
             </div>
 
+            <Separator />
+
+            {/* Social Media Integrations */}
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold">Connected Accounts</h2>
+              <p className="text-muted-foreground">
+                Link your club’s social media accounts to enable automatic
+                posting and updates directly from Club Finder.{" "}
+              </p>
+              <Link href="/onboarding/discord">
+                <Button
+                  variant="default"
+                  disabled={discordConnected}
+                  className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {discordConnected
+                    ? "Connected to Discord"
+                    : "Connect to Discord"}
+                  <LinkIcon className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
             <Separator />
 
             {/* Submit Button */}

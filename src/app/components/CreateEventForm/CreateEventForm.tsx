@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Link } from "lucide-react";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -379,10 +380,10 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           {!discordConnected ? (
             <>
               <p className="text-sm text-muted-foreground mb-2">
-                Add a bot to your Discord server
+                Add a bot to post events to your server.
               </p>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" size="sm" asChild>
+                <Button type="button" variant="default" size="sm" asChild>
                   <a href="/onboarding/discord">Connect Discord</a>
                 </Button>
               </div>
@@ -407,11 +408,20 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           )}
         </div>
 
-        {ok && <p className="text-green-600 text-sm">{ok}</p>}
+        {ok && <p className="text-green-600 text-sm">{
+          "Event created successfully!"
+      }</p>}
         {err && <p className="text-red-600 text-sm">{err}</p>}
-        <Button type="submit" disabled={submitting} className="w-full">
+        <Button type="submit" disabled={submitting || !form.event_name || !form.date || !form.time} className="w-full">
           {submitting ? "Creating..." : "Create Event"}
         </Button>
+        {ok && (
+          <Link href="/dashboard/club-events">
+            <Button variant='outline' className="w-full">
+              View Your Events
+            </Button>
+          </Link>
+        )}
       </form>
     </div>
   );
