@@ -1,3 +1,6 @@
+
+"use client";
+
 import EventCard from "./EventCard";
 import { toEventItem } from "@/lib/eventsClient";
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import EventCard from '@/app/components/EventsSection/EventList/EventCard'
-import { getAllEventsData, toEventItem } from '@/lib/eventsClient'
+import { getAllEventsData, toEventItem } from '@/lib/eventsServer'
 
 export default async function ClubEventsPage() {
   const { upcoming, past, today, error } = await getAllEventsData();

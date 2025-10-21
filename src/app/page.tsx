@@ -2,26 +2,71 @@
   This is the main landing page, showing upcoming and past events.
 */
 
-// because by default Next.js caches pages, we need to disable caching to see live data
+"use client";
 
-export const revalidate = 0; // don't cache this page
-export const dynamic = "force-dynamic"; // force dynamic rendering
-
+import { useEffect, useState } from "react";
 import HomeHero from "./components/HomeHero";
 import EventsSection from "./components/EventsSection/EventsSection";
 import Footer from "./components/Footer/Footer";
 import SearchView from "./components/SearchView";
-import { getAllEventsData } from "../lib/eventsClient";
+import { getAllEventsData } from "../lib/eventsServer";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-export default async function Home() {
-  const { upcoming, past, today, error } = await getAllEventsData();
+export default function Home() {
+  const [eventsData, setEventsData] = useState<{
+    upcoming: any[];
+    past: any[];
+    today: any[];
+    error: string | null;
+  }>({
+    upcoming: [],
+    past: [],
+    today: [],
+    error: null
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await getAllEventsData();
+        setEventsData(data);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+        setEventsData({
+          upcoming: [],
+          past: [],
+          today: [],
+          error: "Failed to load events"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
+    <ProtectedRoute>
       <main className="">
         <HomeHero />
-        <EventsSection upcoming={upcoming} past={past} today={today} />
-        <SearchView upcoming_full={upcoming} past_full={past} />
+        <EventsSection 
+          upcoming={eventsData.upcoming} 
+          past={eventsData.past} 
+          today={eventsData.today} 
+        />
+        {/* <SearchView upcoming_full={eventsData.upcoming} past_full={eventsData.past} /> */}
         <Footer />
       </main>
+    </ProtectedRoute>
   );
 }

@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,24 +9,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { getSupabaseClient } from "@/app/lib/supabaseServer";
+import { useAuth } from "../../AuthProvider";
 import { User } from "@supabase/supabase-js";
 
 interface UserDropdownProps {
-  user: {
-    name: string;
-    isClub: boolean;
-  };
+  user: User | null;
 }
 
-export default function UserDropdown({ user }: { user: User | null }) {
-  const supabase = getSupabaseClient();
+export default function UserDropdown({ user }: UserDropdownProps) {
+  const { signOut } = useAuth();
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-  };
+  if (!user) return null;
 
-  console.log(user);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { toEventItem } from "@/lib/eventsClient";
 
@@ -20,7 +22,7 @@ export default function TodayEventsCard({ today, isMobile = false }: TodayEvents
           .map((event) => toEventItem(event))
           .map((event) => (
             <Card 
-              key={event.id} 
+              key={'event' + event.id} 
               className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200"
             >
               <CardTitle className="px-6">{event.club}</CardTitle>
