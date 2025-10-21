@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "../app/lib/supabase";
+import { getSupabaseClient } from "../app/lib/supabaseServer";
 import { EventItem } from "../app/lib/data";
 
 /**
@@ -95,8 +95,16 @@ export async function getPastEvents(limit: number = 10, clubName?: string) {
 export async function getTodayEvents(clubName?: string) {
   const supabase = getSupabaseClient();
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  ).toISOString();
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1
+  ).toISOString();
 
   let query = supabase
     .from("events")
@@ -157,7 +165,10 @@ export async function getTodayEvents(clubName?: string) {
  * @param clubName - Optional club name to filter by
  * @param pastLimit - Maximum number of past events to return (default: 10)
  */
-export async function getAllEventsData(clubName?: string, pastLimit: number = 10) {
+export async function getAllEventsData(
+  clubName?: string,
+  pastLimit: number = 10
+) {
   try {
     const [upcoming, past, today] = await Promise.all([
       getUpcomingEvents(clubName),

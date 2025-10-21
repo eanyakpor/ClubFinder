@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import NavBar from "./NavBar/NavBar";
 import type { User } from "@supabase/supabase-js";
-import { getSupabaseClient } from "../lib/supabase";
+import { getSupabaseClient } from "../lib/supabaseServer";
+import { getCurrentUser } from "../lib/auth-actions";
 
 interface AuthContextType {
   user: User | null;
@@ -30,18 +31,25 @@ interface AuthProviderProps {
   initialUser?: User | null;
 }
 
-export default function AuthProvider({ children, initialUser = null }: AuthProviderProps) {
+export default function AuthProvider({
+  children,
+  initialUser = null,
+}: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(initialUser);
   const [loading, setLoading] = useState(!initialUser);
 
   const refreshUser = async () => {
     setLoading(true);
+
     try {
       const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      console.log("User session check:", { session });
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      console.error("Error refreshing user:", error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -50,24 +58,24 @@ export default function AuthProvider({ children, initialUser = null }: AuthProvi
 
   useEffect(() => {
     const supabase = getSupabaseClient();
-    
+
     // Get initial session if no initial user provided
     if (!initialUser) {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log('Initial session check:', { session });
+        console.log("Initial session check:", { session });
         setUser(session?.user ?? null);
         setLoading(false);
       });
     }
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', { event, user: session?.user });
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", { event, user: session?.user });
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, [initialUser]);

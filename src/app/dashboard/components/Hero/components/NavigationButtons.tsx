@@ -38,7 +38,7 @@ function NavigationButtons() {
         } w-52`}
         onClick={() => handleSelectPage("club-events")}
       >
-        View Events
+        View Club Events
       </Button>
       <Button
         variant={"outline"}

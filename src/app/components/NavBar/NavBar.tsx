@@ -7,7 +7,6 @@ import { User } from "@supabase/supabase-js";
 
 function NavBar({user}: {user: User | null}) {
 
-  console.log("user", user);
   return (
     <header className="h-14 flex items-center justify-between px-8">
       <NavBarLogo />

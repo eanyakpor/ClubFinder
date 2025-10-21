@@ -35,7 +35,7 @@ export async function SectionCards() {
 
       <Card className="@container/card">
         <CardHeader className="">
-          <CardTitle className="">Total Reach/Impressions</CardTitle>
+          <CardTitle className="">Total Reach</CardTitle>
           <CardAction>
             <Badge
               variant="outline"
@@ -149,7 +149,8 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {RSVPCount > previousRSVPCount ? (
               <>
-                Event participation on the rise <TrendingUp className="size-4" />
+                Event participation on the rise{" "}
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
@@ -193,11 +194,13 @@ export async function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {engagementRate > previousEngagementRate ? (
               <>
-                Audience interactions increasing <TrendingUp className="size-4" />
+                Audience interactions increasing{" "}
+                <TrendingUp className="size-4" />
               </>
             ) : (
               <>
-                Lower engagement on recent posts <TrendingDown className="size-4" />
+                Lower engagement on recent posts{" "}
+                <TrendingDown className="size-4" />
               </>
             )}
           </div>

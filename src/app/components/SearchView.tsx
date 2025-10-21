@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import { EventItem } from "../lib/data";
-import EventCard from "./EventList/EventCard";
+import EventCard from "./EventsSection/EventList/EventCard";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { getSupabaseClient } from "../lib/supabase";
+import { getSupabaseClient } from "../lib/supabaseServer";
 
 type Role = "student" | "club";
 
