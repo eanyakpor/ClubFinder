@@ -1,11 +1,11 @@
 // src/lib/data.ts
-import { getSupabaseClient } from "./supabase";
+import { getSupabaseClient } from "./supabaseServer";
 
 export type EventItem = {
   id: string;
-  club: string;     // maps from club_name
+  club: string; // maps from club_name
   title: string;
-  start: string;    // maps from start_time (ISO)
+  start: string; // maps from start_time (ISO)
   location: string | null;
   tags: string[] | null;
 };
@@ -16,14 +16,16 @@ export async function listEvents(): Promise<EventItem[]> {
   // Alias DB columns → expected UI shape
   const { data, error } = await supabase
     .from("events")
-    .select(`
+    .select(
+      `
       id,
       title,
       club:club_name,
       start:start_time,
       location,
       tags
-    `)
+    `
+    )
     .order("start_time", { ascending: true });
 
   if (error) {
