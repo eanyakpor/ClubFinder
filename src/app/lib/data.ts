@@ -1,5 +1,5 @@
 // src/lib/data.ts
-import { getSupabaseClient } from "./supabaseServer";
+import { createClient } from "@/utils/supabase/client";
 
 export type EventItem = {
   id: string;
@@ -11,7 +11,7 @@ export type EventItem = {
 };
 
 export async function listEvents(): Promise<EventItem[]> {
-  const supabase = getSupabaseClient();
+  const supabase = createClient();
 
   // Alias DB columns → expected UI shape
   const { data, error } = await supabase

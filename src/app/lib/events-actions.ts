@@ -6,7 +6,7 @@
 
 'use server'
 
-import { createClient } from "./supabaseServer"
+import { createClient } from "@/utils/supabase/client"
 
 // Server-only Supabase client for data operations
 

@@ -98,3 +98,13 @@
 //     </main>
 //   );
 // }
+
+import React from 'react'
+
+function SocialMediaDashboard() {
+  return (
+    <div>page</div>
+  )
+}
+
+export default SocialMediaDashboard
