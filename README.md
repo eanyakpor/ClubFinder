@@ -1,38 +1,57 @@
-# ClubFinder
-website that shows the dates/times of all sports/organizations in CSUN
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SOSE Hackathon 2025 – Club Connect
 
-## Getting Started
+**Project Title:** Club Connect  
+**Team Members:** Emi, Duane, Rainer, Tigran, Vram, Ben
+**Category:** Hack for Social Connection  
+**Tech Stack:** React, Node.js, Supabase, Tailwind CSS, GitHub, Vercel  
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Project Overview
+During the SOSE Hackathon 2025, our team noticed a common challenge for CSUN students: staying connected with campus clubs and events is often confusing and time-consuming. The existing platform, MataSync, is outdated, missing key details, and does not provide an easy way for students to see what clubs are active or when events happen. Students with busy schedules, including work, commuting, and academics, often struggle to find opportunities that fit their time and interests.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To address this, we developed **Club Connect**, a web platform that makes discovering, joining, and participating in clubs simple and convenient. It centralizes all club information and event listings into one intuitive, real-time hub, helping students make the most of their limited free time while giving clubs a better way to share updates and reach their community.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Technical Approach
+The frontend is built using **React** and **Tailwind CSS**, creating a clean, responsive, and easy-to-navigate interface. The backend uses **Node.js** and **Supabase**, which allows secure, real-time updates and reliable database management. The app is hosted on **Vercel** for scalability and continuous deployment, while **GitHub** manages version control and collaborative development. **Google OAuth** integration ensures secure sign-in using CSUN credentials, and role-based access allows club officers to manage events without compromising data integrity.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Purpose and Features
+**Club Connect** is designed to make campus life more accessible and organized for students while helping clubs grow and maintain engagement.  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Key Features:**  
+- Dynamic event board displaying upcoming club events in chronological order  
+- Search and filter tools to explore clubs by category, interest, or date  
+- Club profiles with contact information and event history  
+- Notifications for upcoming events and invites
+- Real-time updates allowing clubs to post, edit, or remove events instantly  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+By providing a single, centralized platform, Club Connect removes barriers for busy students and encourages consistent participation, fostering a stronger and more connected campus community.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Submission Materials
+- **GitHub Repository:** [Insert link here]  
+- **Live Demo:** [Insert deployed app link]  
+- **Video Demo:** [Insert video link, maximum three minutes]  
+- **Optional Mockups or Screenshots:** [Insert if available]  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Relevance to Hackathon Category
+This project is a strong fit for the **Hack for Social Connection** category because its primary goal is to enhance how students discover, connect, and engage with campus communities. Students often face fragmented communication across multiple platforms, which makes joining clubs and attending events difficult, especially for those balancing academics, work, and commuting.  
+
+Club Connect addresses this challenge by centralizing club information and events into a single, accessible platform, making it faster and easier for students to find opportunities that align with their interests. By improving visibility for clubs and simplifying student engagement, the platform strengthens peer-to-peer connections and encourages participation in campus life. Unlike solutions focused solely on infrastructure or administration, Club Connect is specifically designed to foster meaningful social connections among students, making it a natural and strong fit for this category.
+
+---
+
+## Resume Value
+Developed a real-time web platform to centralize student organization information and events, improving accessibility, engagement, and communication using React, Supabase, Node.js, and Tailwind CSS.
+
+---
+
+## Future Improvements
+Integration with official collegiate databases for verified club listings; mobile app version with push notifications; AI-driven club recommendations based on user interests; calendar synchronization for easy scheduling; AI assisted 'interests' search 
