@@ -6,6 +6,8 @@ import { useAuth } from "../AuthProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -247,9 +249,9 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-10rem)] overflow-y-auto">
+    <div className="flex flex-col gap-4 h-[calc(100vh-10rem)] overflow-y-auto px-6">
       {clubInfo && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div className="p-3 bg-blue-400/20 border border-blue-600/20 rounded-md">
           <p className="text-sm font-medium text-blue-900">Creating event for:</p>
           <p className="text-blue-800"><strong>{clubInfo.name}</strong></p>
         </div>
@@ -266,6 +268,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             value={form.event_name}
             onChange={(e) => onChange("event_name", e.target.value)}
             placeholder="e.g., Hack Night"
+            className="border-border"
           />
         </div>
 
@@ -280,6 +283,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               required
               value={form.date}
               onChange={(e) => onChange("date", e.target.value)}
+              className="border-border"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -292,6 +296,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               required
               value={form.time}
               onChange={(e) => onChange("time", e.target.value)}
+              className="border-border"
             />
           </div>
         </div>
@@ -305,6 +310,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             value={form.location || ""}
             onChange={(e) => onChange("location", e.target.value)}
             placeholder="e.g., Sierra Hall 123"
+            className="border-border"
           />
         </div>
 
@@ -312,21 +318,21 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <Label htmlFor="other">
             Description <span className="text-xs text-gray-500">(optional)</span>
           </Label>
-          <textarea
+          <Textarea
             id="other"
-            className="w-full rounded border px-3 py-2 min-h-[80px] resize-none"
             value={form.other || ""}
             onChange={(e) => onChange("other", e.target.value)}
             placeholder="Event description, RSVP links, or extra details"
+            className="border-border"
           />
         </div>
 
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={form.repeat_weekly || false}
-              onChange={(e) => onChange("repeat_weekly", e.target.checked)}
+              onCheckedChange={(checked) => onChange("repeat_weekly", checked === true)}
+              className="bg-card cursor-pointer border-border"
             />
             Repeats Weekly
           </label>
@@ -355,18 +361,18 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               <Button type="button" variant="outline" size="sm" asChild>
                 <a href="/SocialMediaDashboard">Connect Discord</a>
               </Button>
-              <span className="text-xs text-gray-500">
+              <span className="text-sm text-red-500">
                 Set up Discord integration to enable posting
               </span>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="post_to_discord"
                   checked={form.post_to_discord || false}
-                  onChange={(e) => onChange("post_to_discord", e.target.checked)}
+                  onCheckedChange={(checked) => onChange("post_to_discord", checked === true)}
+                  className="bg-card cursor-pointer border-border"
                 />
                 <label htmlFor="post_to_discord" className="text-sm">
                   Post this event to Discord

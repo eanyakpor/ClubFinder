@@ -27,9 +27,9 @@ export default function CreateEventDialog({ isClub }: CreateEventDialogProps) {
           Create Event
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[425px] sm:max-w-[425px] !max-h-[692px]">
+      <DialogContent className="p-0 pb-6 flex flex-col w-[425px] sm:max-w-[425px] !max-h-[692px]">
         <DialogHeader>
-          <DialogTitle>Create Event</DialogTitle>
+          <DialogTitle className="p-6 pb-4">Create Event</DialogTitle>
         </DialogHeader>
         <CreateEventForm />
       </DialogContent>

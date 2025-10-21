@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { MessageSquare, ArrowRight, SkipForward } from "lucide-react";
+import Link from "next/link";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,15 +28,14 @@ export default function DiscordOnboardingPage() {
   const router = useRouter();
   const [clubId, setClubId] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-
-  const [discordLoading, setDiscordLoading] = useState(false);
+  const [step, setStep] = useState<"intro" | "connect" | "configure">("intro");
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [guildId, setGuildId] = useState<string>("");
   const [channelId, setChannelId] = useState<string>("");
-
-  const [msg, setMsg] = useState<string>("");
-  const [step, setStep] = useState<"intro" | "connect" | "configure">("intro");
+  const [discordLoading, setDiscordLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [botInvited, setBotInvited] = useState(false);
 
   // Read OAuth callback parameters
   useEffect(() => {
@@ -202,13 +202,13 @@ export default function DiscordOnboardingPage() {
 
   if (step === "intro") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+      <div className="flex md:items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-card-foreground mb-2">
               Connect Your Discord Bot
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Automatically post your events to Discord and engage with your
               community
             </p>
@@ -216,7 +216,7 @@ export default function DiscordOnboardingPage() {
 
           <Card className="mb-6">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
+              <div className="mx-auto mb-4 p-3 bg-blue-400/20 rounded-full w-fit">
                 <MessageSquare className="h-8 w-8 text-blue-600" />
               </div>
               <CardTitle className="text-xl">Why Connect Discord?</CardTitle>
@@ -224,44 +224,30 @@ export default function DiscordOnboardingPage() {
                 Streamline your club's communication and event promotion
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-gray-600 space-y-3">
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span>
-                    <strong>Automatic Event Posts:</strong> Your events will be
-                    automatically shared in your Discord server
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span>
-                    <strong>Real-time Updates:</strong> Members get notified
-                    about new events and changes
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span>
-                    <strong>Increased Engagement:</strong> Reach your Discord
-                    community where they're already active
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span>
-                    <strong>Easy Management:</strong> One place to manage
-                    events, multiple places to share them
-                  </span>
-                </li>
-              </ul>
+            <CardContent className="flex flex-col gap-2 px-6">
+              <p>
+                <strong>Automatic Event Posts:</strong> Your events will be
+                automatically shared in your Discord server
+              </p>
+              <p>
+                <strong>Real-time Updates:</strong> Members get notified about
+                new events and changes
+              </p>
+              <p>
+                <strong>Increased Engagement:</strong> Reach your Discord
+                community where they're already active
+              </p>
+              <p>
+                <strong>Easy Management:</strong> One place to manage events,
+                multiple places to share them
+              </p>
             </CardContent>
           </Card>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               onClick={() => setStep("connect")}
-              className="px-8 py-2 text-lg"
+              className="px-8 py-2 text-lg cursor-pointer"
               size="lg"
             >
               <MessageSquare className="mr-2 h-5 w-5" />
@@ -270,7 +256,7 @@ export default function DiscordOnboardingPage() {
             <Button
               variant="outline"
               onClick={skipDiscord}
-              className="px-8 py-2 text-lg"
+              className="px-8 py-2 text-lg cursor-pointer"
               size="lg"
             >
               <SkipForward className="mr-2 h-5 w-5" />
@@ -288,190 +274,186 @@ export default function DiscordOnboardingPage() {
 
   if (step === "connect" || (step === "configure" && !hasToken)) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Sign in with Discord
-            </h1>
-            <p className="text-gray-600">
+      <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto">
+        <Card className="w-full max-w-md h-min">
+          <CardHeader>
+            <CardTitle>Sign in with Discord</CardTitle>
+            <CardDescription>
               We need access to your Discord servers to set up the bot
-            </p>
-          </div>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-sm mb-4 text-gray-600">
-                  This will allow us to list your Discord servers and channels
-                </p>
-                <a
-                  className="inline-flex items-center justify-center rounded-md bg-[#5865F2] text-white px-6 py-3 font-medium hover:bg-[#4752C4] transition-colors"
-                  href={`/api/discord/oauth/start?state=${encodeURIComponent(
-                    clubId || "onboarding"
-                  )}&return_to=${encodeURIComponent("/onboarding/discord")}`}
-                >
-                  <MessageSquare className="mr-2 h-5 w-5" />
-                  Sign in with Discord
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="mt-6 text-center">
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <Button className="">
+              <Link
+                className="flex items-center gap-2"
+                href={`/api/discord/oauth/start?state=${encodeURIComponent(
+                  clubId || "onboarding"
+                )}&return_to=${encodeURIComponent("/onboarding/discord")}`}
+              >
+                <MessageSquare className=" h-6 w-6" />
+                Sign in with Discord
+              </Link>
+            </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setStep("intro")}
-              className="text-sm text-gray-600"
+              className="text-sm text-muted-foreground"
             >
               ← Back
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   // Configure step
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Configure Discord Bot
-          </h1>
-          <p className="text-gray-600">
-            Choose where your events should be posted
+    <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-card-foreground mb-2">
+          Configure Discord Bot
+        </h1>
+        <p className="text-muted-foreground">
+          Choose where your events should be posted
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4">
+          {/* Bot Invitation Step */}
+          <h3 className="font-medium text-card-foreground">
+            Step 1: Invite Bot to Your Server
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Before we can access your Discord channels, you need to invite our
+            bot to your server.
           </p>
-        </div>
-
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            {/* Bot Invitation Step */}
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-              <h3 className="font-medium text-blue-900 mb-2">
-                Step 1: Invite Bot to Your Server
-              </h3>
-              <p className="text-sm text-blue-700 mb-3">
-                Before we can access your Discord channels, you need to invite
-                our bot to your server.
-              </p>
-              <a
-                href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID}&permissions=2048&scope=bot`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-[#5865F2] text-white px-4 py-2 text-sm font-medium hover:bg-[#4752C4] transition-colors"
-              >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Invite Bot to Server
-              </a>
-              <p className="text-xs text-blue-600 mt-2">
-                This opens in a new tab. Come back here after inviting the bot.
-              </p>
-            </div>
-
-            {/* Load Guilds */}
-            {guilds.length === 0 && (
-              <div>
-                <p className="text-sm mb-3 text-gray-600">
-                  Step 2: Load your Discord servers (after inviting the bot):
-                </p>
-                <Button
-                  onClick={loadGuilds}
-                  disabled={discordLoading}
-                  className="w-full"
-                >
-                  {discordLoading ? "Loading..." : "Load Discord Servers"}
-                </Button>
-              </div>
-            )}
-
-            {/* Select Guild */}
-            {guilds.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">
-                  Discord Server
-                </label>
-                <select
-                  className="w-full border rounded-md px-3 py-2 bg-white"
-                  value={guildId}
-                  onChange={(e) => onGuildChange(e.target.value)}
-                >
-                  <option value="">Select a server...</option>
-                  {guilds.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  If your server isn't listed, make sure the bot has been
-                  invited to it using the link above
-                </p>
-              </div>
-            )}
-
-            {/* Select Channel */}
-            {channels.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">
-                  Channel for Events
-                </label>
-                <select
-                  className="w-full border rounded-md px-3 py-2 bg-white"
-                  value={channelId}
-                  onChange={(e) => setChannelId(e.target.value)}
-                >
-                  <option value="">Select a channel...</option>
-                  {channels.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      #{c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Save Button */}
-            <Button
-              onClick={saveAndContinue}
-              disabled={!guildId || !channelId || discordLoading}
-              className="w-full"
-            >
-              {discordLoading ? (
-                "Saving..."
-              ) : (
-                <>
-                  Save & Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {msg && (
-          <div
-            className={`mt-4 p-3 rounded-md text-sm ${
-              msg.startsWith("✅")
-                ? "bg-green-50 text-green-700"
-                : "bg-red-50 text-red-700"
-            }`}
+          <Button 
+            className="cursor-pointer w-min"
+            onClick={() => {
+              setBotInvited(true);
+              window.open(`https://discord.com/api/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID}&permissions=2048&scope=bot`, '_blank');
+            }}
           >
-            {msg}
-          </div>
-        )}
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Invite Bot to Server
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            This opens in a new tab. Come back here after inviting the bot.
+          </p>
 
-        <div className="mt-6 text-center">
+          {/* Load Guilds */}
+          {guilds.length === 0 && (
+            <>
+              <h3 className="font-medium text-card-foreground">
+                Step 2: Load your Discord servers (after inviting the bot):
+              </h3>
+              <Button
+                onClick={loadGuilds}
+                disabled={discordLoading || !botInvited}
+                className="w-min"
+              >
+                {discordLoading ? "Loading..." : "Load Discord Servers"}
+              </Button>
+            </>
+          )}
+
+          {/* Select Guild */}
+          {guilds.length > 0 && (
+            <>
+              <h3 className="font-medium text-card-foreground">
+                Step 3: Select a Discord Server
+              </h3>
+              <select
+                className="w-min border rounded-md px-3 py-2 bg-card"
+                value={guildId}
+                onChange={(e) => onGuildChange(e.target.value)}
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                <option value="" className="text-card-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Select a server...
+                </option>
+                {guilds.map((g) => (
+                  <option
+                    key={g.id}
+                    value={g.id}
+                    className="text-card-foreground"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {/* Select Channel */}
+          {channels.length > 0 && (
+            <>
+              <h3 className="font-medium text-card-foreground">
+                Step 4: Select a Discord Channel
+              </h3>
+              <select
+                className="w-full border rounded-md px-3 py-2 bg-card"
+                value={channelId}
+                onChange={(e) => setChannelId(e.target.value)}
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                <option value="" className="text-card-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Select a channel...
+                </option>
+                {channels.map((c) => (
+                  <option
+                    key={c.id}
+                    value={c.id}
+                    className="text-card-foreground"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    #{c.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {/* Save Button */}
           <Button
-            variant="ghost"
+            onClick={saveAndContinue}
+            disabled={!guildId || !channelId || discordLoading}
+            className="flex items-center justify-center gap-2"
+          >
+            {discordLoading ? (
+              "Saving..."
+            ) : (
+              <>
+                Save & Continue
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
             onClick={skipDiscord}
-            className="text-sm text-gray-600"
+            className="cursor-pointer"
           >
             Skip Discord Setup
           </Button>
+        </CardContent>
+      </Card>
+
+      {msg && (
+        <div
+          className={`mt-4 p-3 rounded-md text-sm ${
+            msg.startsWith("✅")
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
+          }`}
+        >
+          {msg}
         </div>
-      </div>
+      )}
     </div>
   );
 }
