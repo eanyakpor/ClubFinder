@@ -11,6 +11,7 @@ import EventsSection from "./components/EventsSection/EventsSection";
 import Footer from "./components/Footer/Footer";
 import SearchView from "./components/SearchView";
 import { getAllEventsData } from "../lib/eventsServer";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function Home() {
   const [eventsData, setEventsData] = useState<{
@@ -59,14 +60,16 @@ export default function Home() {
   }
 
   return (
-    <main className="">
-      <HomeHero />
-      <EventsSection 
-        upcoming={eventsData.upcoming} 
-        past={eventsData.past} 
-        today={eventsData.today} 
-      />
-      {/* <SearchView upcoming_full={eventsData.upcoming} past_full={eventsData.past} /> */}
-    </main>
+    <ProtectedRoute>
+      <main className="">
+        <HomeHero />
+        <EventsSection 
+          upcoming={eventsData.upcoming} 
+          past={eventsData.past} 
+          today={eventsData.today} 
+        />
+        {/* <SearchView upcoming_full={eventsData.upcoming} past_full={eventsData.past} /> */}
+      </main>
+    </ProtectedRoute>
   );
 }

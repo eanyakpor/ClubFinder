@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "./AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 interface ProtectedRouteProps {
@@ -17,6 +17,7 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, profile, hasClub, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading) {
@@ -33,8 +34,10 @@ export default function ProtectedRoute({
       }
       
       // Check if club user needs to complete onboarding
-      if (requireRole && profile && profile.profile_type === 'club' && hasClub === false) {
-        router.push('/onboarding/discord');
+      // Don't redirect if already on onboarding pages
+      const isOnOnboardingPage = pathname?.startsWith('/onboarding/');
+      if (requireRole && profile && profile.profile_type === 'club' && hasClub === false && !isOnOnboardingPage) {
+        router.push('/onboarding/club');
         return;
       }
     }
@@ -58,8 +61,10 @@ export default function ProtectedRoute({
   }
 
   // If club user hasn't completed onboarding, redirect to onboarding
-  if (requireRole && profile && profile.profile_type === 'club' && hasClub === false) {
-    return null; // Will redirect to /onboarding/discord via useEffect
+  // Don't redirect if already on onboarding pages
+  const isOnOnboardingPage = pathname?.startsWith('/onboarding/');
+  if (requireRole && profile && profile.profile_type === 'club' && hasClub === false && !isOnOnboardingPage) {
+    return null; // Will redirect to /onboarding/club via useEffect
   }
 
   return <>{children}</>;

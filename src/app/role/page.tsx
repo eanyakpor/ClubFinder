@@ -30,7 +30,7 @@ export default function RoleSelectionPage() {
 
       // Redirect based on role
       if (role === "club") {
-        router.push("/onboarding/discord");
+        router.push("/onboarding/club");
       } else {
         router.push("/");
       }
@@ -54,12 +54,12 @@ export default function RoleSelectionPage() {
   }
 
   return (
-    <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto">
+    <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-card-foreground mb-2">
+        <h1 className="text-3xl font-bold text-white mb-2">
           Welcome to ClubFinder!
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-white/90">
           Please select your role to get started
         </p>
       </div>

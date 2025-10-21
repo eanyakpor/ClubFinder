@@ -54,7 +54,8 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [clubId, setClubId] = useState<string | null>(null);
   const [clubInfo, setClubInfo] = useState<ClubRow | null>(null);
   const [discordConnected, setDiscordConnected] = useState<boolean>(false);
-  const [needsClubOnboarding, setNeedsClubOnboarding] = useState<boolean>(false);
+  const [needsClubOnboarding, setNeedsClubOnboarding] =
+    useState<boolean>(false);
 
   function onChange<K extends keyof FormState>(key: K, v: FormState[K]) {
     setForm((f) => ({ ...f, [key]: v }));
@@ -161,24 +162,29 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
 
       console.log("Inserting event payload:", payload);
       console.log("Current user:", user);
-      
+
       // Get the current session to ensure we're authenticated
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       console.log("Current session:", session ? "exists" : "missing");
-      
-      const { data, error } = await supabase.from("events").insert(payload).select();
-      
+
+      const { data, error } = await supabase
+        .from("events")
+        .insert(payload)
+        .select();
+
       if (error) {
         console.error("Supabase insert error:", error);
         console.error("Error details:", {
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
         throw new Error(`Database error: ${error.message}`);
       }
-      
+
       console.log("Event inserted successfully:", data);
 
       // Post to Discord if enabled
@@ -258,8 +264,12 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
     <div className="flex flex-col gap-4 h-[calc(100vh-10rem)] overflow-y-auto px-6">
       {clubInfo && (
         <div className="p-3 bg-blue-400/20 border border-blue-600/20 rounded-md">
-          <p className="text-sm font-medium text-blue-900">Creating event for:</p>
-          <p className="text-blue-800"><strong>{clubInfo.name}</strong></p>
+          <p className="text-sm font-medium text-blue-900">
+            Creating event for:
+          </p>
+          <p className="text-blue-800">
+            <strong>{clubInfo.name}</strong>
+          </p>
         </div>
       )}
 
@@ -322,7 +332,8 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="other">
-            Description <span className="text-xs text-gray-500">(optional)</span>
+            Description{" "}
+            <span className="text-xs text-gray-500">(optional)</span>
           </Label>
           <Textarea
             id="other"
@@ -337,7 +348,9 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <label className="flex items-center gap-2 text-sm font-medium">
             <Checkbox
               checked={form.repeat_weekly || false}
-              onCheckedChange={(checked) => onChange("repeat_weekly", checked === true)}
+              onCheckedChange={(checked) =>
+                onChange("repeat_weekly", checked === true)
+              }
               className="bg-card cursor-pointer border-border"
             />
             Repeats Weekly
@@ -347,7 +360,8 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         {form.repeat_weekly && (
           <div className="flex flex-col gap-2">
             <Label htmlFor="repeat_until">
-              Repeat Until <span className="text-xs text-gray-500">(optional)</span>
+              Repeat Until{" "}
+              <span className="text-xs text-gray-500">(optional)</span>
             </Label>
             <Input
               id="repeat_until"
@@ -361,23 +375,27 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         {/* Discord Section */}
         <div className="border-t pt-4">
           <h3 className="text-sm font-medium mb-2">Post to Discord?</h3>
-          
+
           {!discordConnected ? (
-            <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="sm" asChild>
-                <a href="/onboarding/discord">Connect Discord</a>
-              </Button>
-              <span className="text-sm text-red-500">
-                Set up Discord integration to enable posting
-              </span>
-            </div>
+            <>
+              <p className="text-sm text-muted-foreground mb-2">
+                Add a bot to your Discord server
+              </p>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <a href="/onboarding/discord">Connect Discord</a>
+                </Button>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="post_to_discord"
                   checked={form.post_to_discord || false}
-                  onCheckedChange={(checked) => onChange("post_to_discord", checked === true)}
+                  onCheckedChange={(checked) =>
+                    onChange("post_to_discord", checked === true)
+                  }
                   className="bg-card cursor-pointer border-border"
                 />
                 <label htmlFor="post_to_discord" className="text-sm">
@@ -388,7 +406,6 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             </div>
           )}
         </div>
-
 
         {ok && <p className="text-green-600 text-sm">{ok}</p>}
         {err && <p className="text-red-600 text-sm">{err}</p>}

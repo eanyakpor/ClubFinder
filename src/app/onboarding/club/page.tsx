@@ -43,13 +43,23 @@ export default function ClubOnboardingPage() {
 
   async function applyPendingDiscordConfig(clubId: string) {
     try {
+      console.log("Applying pending Discord config for club:", clubId);
       const pendingConfig = localStorage.getItem("pendingDiscordConfig");
-      if (!pendingConfig) return;
+      console.log("Pending config from localStorage:", pendingConfig);
+      
+      if (!pendingConfig) {
+        console.log("No pending Discord config found");
+        return;
+      }
 
       const config = JSON.parse(pendingConfig);
       const { guildId, channelId } = config;
+      console.log("Parsed config:", { guildId, channelId });
 
-      if (!guildId || !channelId) return;
+      if (!guildId || !channelId) {
+        console.log("Missing guildId or channelId");
+        return;
+      }
 
       // Get the current Supabase session token
       const {
@@ -57,10 +67,11 @@ export default function ClubOnboardingPage() {
         error: sessionError,
       } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {
-        console.error("No session for Discord config save");
+        console.error("No session for Discord config save:", sessionError);
         return;
       }
 
+      console.log("Making API call to save Discord config");
       // Save Discord configuration
       const r = await fetch("/api/discord/save-target", {
         method: "POST",
@@ -71,12 +82,15 @@ export default function ClubOnboardingPage() {
         body: JSON.stringify({ clubId, guildId, channelId }),
       });
 
+      const responseData = await r.json();
+      console.log("API response:", { status: r.status, data: responseData });
+
       if (r.ok) {
         console.log("Discord configuration applied successfully");
         // Clear the pending config
         localStorage.removeItem("pendingDiscordConfig");
       } else {
-        console.error("Failed to apply Discord configuration");
+        console.error("Failed to apply Discord configuration:", responseData);
       }
     } catch (error) {
       console.error("Error applying pending Discord config:", error);
@@ -146,8 +160,7 @@ export default function ClubOnboardingPage() {
       const clubId = upserted.id as string;
       console.log("Club created successfully with ID:", clubId);
 
-      // Check for pending Discord configuration and apply it
-      await applyPendingDiscordConfig(clubId);
+      // Discord integration is now handled separately via "Connect Discord" button
 
       // Refresh club status in AuthProvider
       await refreshClubStatus();
@@ -162,7 +175,7 @@ export default function ClubOnboardingPage() {
   }
 
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto">
+    <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
       <Card className="w-full max-w-md">
         <CardHeader>
           <h1 className="text-xl font-semibold">Club Onboarding</h1>

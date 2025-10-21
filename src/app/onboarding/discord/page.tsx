@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "../../components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,10 +15,6 @@ import {
 import { MessageSquare, ArrowRight, SkipForward } from "lucide-react";
 import Link from "next/link";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type Guild = { id: string; name: string; icon?: string | null };
 type Channel = { id: string; name: string; type: number };
@@ -26,6 +22,7 @@ type Channel = { id: string; name: string; type: number };
 export default function DiscordOnboardingPage() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
+  const supabase = createClient();
   const [clubId, setClubId] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [step, setStep] = useState<"intro" | "connect" | "configure">("intro");
@@ -36,6 +33,35 @@ export default function DiscordOnboardingPage() {
   const [discordLoading, setDiscordLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [botInvited, setBotInvited] = useState(false);
+
+  // Fetch club ID for current user
+  useEffect(() => {
+    const fetchClubId = async () => {
+      if (!user || loading) return;
+      
+      try {
+        const { data: club, error } = await supabase
+          .from('clubs')
+          .select('id')
+          .eq('owner_user_id', user.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching club:', error);
+          return;
+        }
+        
+        if (club) {
+          console.log('Found club ID:', club.id);
+          setClubId(club.id);
+        }
+      } catch (error) {
+        console.error('Error in fetchClubId:', error);
+      }
+    };
+
+    fetchClubId();
+  }, [user, loading]);
 
   // Read OAuth callback parameters
   useEffect(() => {
@@ -55,20 +81,20 @@ export default function DiscordOnboardingPage() {
     if (err) {
       if (err === "missing_code") {
         setMsg(
-          "❌ OAuth error: Missing authorization code. Please try signing in again."
+          "OAuth error: Missing authorization code. Please try signing in again."
         );
       } else if (err === "missing_state") {
         setMsg(
-          "❌ OAuth error: Missing state parameter. Please try signing in again."
+          "OAuth error: Missing state parameter. Please try signing in again."
         );
       } else if (err === "oauth") {
         setMsg(
-          `❌ OAuth error: ${
+          `OAuth error: ${
             detail || "Authentication failed"
           }. Please try signing in again.`
         );
       } else {
-        setMsg(`❌ Error: ${err}${detail ? ` - ${detail}` : ""}`);
+        setMsg(`Error: ${err}${detail ? ` - ${detail}` : ""}`);
       }
     }
   }, []);
@@ -79,7 +105,14 @@ export default function DiscordOnboardingPage() {
   );
 
   // Redirect if not authenticated or not a club
-  if (!loading && (!user || (profile && profile.profile_type !== "club"))) {
+  // Allow access if profile is still loading or if user is a club
+  if (!loading && !user) {
+    router.push("/");
+    return null;
+  }
+  
+  // Only redirect if we have a profile and it's definitely not a club
+  if (!loading && profile && profile.profile_type && profile.profile_type !== "club") {
     router.push("/");
     return null;
   }
@@ -149,31 +182,36 @@ export default function DiscordOnboardingPage() {
     setMsg("");
     setDiscordLoading(true);
     try {
-      // During onboarding, we don't have a clubId yet
-      // Store the Discord info in localStorage to use after club creation
+      // Check if we have a club to save to
+      console.log("Current clubId:", clubId);
+      console.log("Current user:", user?.id);
       if (!clubId || clubId === "onboarding") {
-        localStorage.setItem(
-          "pendingDiscordConfig",
-          JSON.stringify({
-            guildId,
-            channelId,
-            accessToken,
-          })
-        );
-        setMsg("✅ Discord configuration saved! Proceeding to club setup...");
-        setTimeout(() => {
-          router.push("/onboarding/club");
-        }, 1500);
+        setMsg("Error: No club found for your account. Please make sure you have completed club onboarding first.");
+        setDiscordLoading(false);
         return;
       }
 
-      // If we have a real clubId, save immediately
+      // Get the current session
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
-      if (sessionError || !session?.access_token) {
-        throw new Error("Please log in again to save Discord settings.");
+      
+      console.log("Session check:", {
+        sessionError,
+        hasSession: !!session,
+        hasAccessToken: !!session?.access_token,
+        userId: session?.user?.id
+      });
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error(`Session error: ${sessionError.message}`);
+      }
+      
+      if (!session?.access_token) {
+        console.error("No access token found in session");
+        throw new Error("No valid session found. Please refresh the page and try again.");
       }
 
       const r = await fetch("/api/discord/save-target", {
@@ -187,8 +225,11 @@ export default function DiscordOnboardingPage() {
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || "Save failed");
 
-      // Redirect to club onboarding
-      router.push("/onboarding/club");
+      // Redirect back to home/dashboard
+      setMsg("Discord integration successful! You can now post events to Discord.");
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
     } catch (e: any) {
       setMsg(e.message || "Save failed");
     } finally {
@@ -197,18 +238,18 @@ export default function DiscordOnboardingPage() {
   }
 
   function skipDiscord() {
-    router.push("/onboarding/club");
+    router.push("/");
   }
 
   if (step === "intro") {
     return (
-      <div className="flex md:items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto">
+      <div className="flex md:items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-card-foreground mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Connect Your Discord Bot
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-white/80">
               Automatically post your events to Discord and engage with your
               community
             </p>
@@ -274,7 +315,7 @@ export default function DiscordOnboardingPage() {
 
   if (step === "connect" || (step === "configure" && !hasToken)) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto">
+      <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
         <Card className="w-full max-w-md h-min">
           <CardHeader>
             <CardTitle>Sign in with Discord</CardTitle>
@@ -309,12 +350,12 @@ export default function DiscordOnboardingPage() {
 
   // Configure step
   return (
-    <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto">
+    <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-card-foreground mb-2">
+        <h1 className="text-2xl font-bold text-white mb-2">
           Configure Discord Bot
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-white/80">
           Choose where your events should be posted
         </p>
       </div>
@@ -446,7 +487,7 @@ export default function DiscordOnboardingPage() {
       {msg && (
         <div
           className={`mt-4 p-3 rounded-md text-sm ${
-            msg.startsWith("✅")
+            msg.includes("saved") || msg.includes("success")
               ? "bg-green-50 text-green-700"
               : "bg-red-50 text-red-700"
           }`}
