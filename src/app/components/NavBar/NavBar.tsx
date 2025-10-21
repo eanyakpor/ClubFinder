@@ -7,7 +7,7 @@ import UserDropdown from "./components/UserDropdown";
 import { useAuth } from "../AuthProvider";
 
 function NavBar() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   return (
     <header className="h-14 flex items-center justify-between px-8">
@@ -19,7 +19,7 @@ function NavBar() {
           <LoginButton />
         ) : (
           <>
-            <CreateEventDialog isClub={user.user_metadata.club ? true : false} />
+            <CreateEventDialog isClub={profile?.profile_type === 'club'} />
             <UserDropdown user={user} />
           </>
         )}

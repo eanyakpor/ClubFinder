@@ -6,7 +6,7 @@ export interface UserProfile {
   id: string;
   email: string | null;
   full_name: string | null;
-  is_club: boolean;
+  profile_type: '' | 'student' | 'club';
   club_name: string | null;
   bio: string | null;
   major: string | null;
@@ -29,3 +29,33 @@ export interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
+
+// Helper functions for profile_type
+export const isClub = (profile: UserProfile | null): boolean => {
+  return profile?.profile_type === 'club';
+};
+
+export const isStudent = (profile: UserProfile | null): boolean => {
+  return profile?.profile_type === 'student';
+};
+
+export const hasSelectedRole = (profile: UserProfile | null): boolean => {
+  return profile?.profile_type !== '' && profile?.profile_type !== undefined;
+};
+
+export const needsRoleSelection = (profile: UserProfile | null): boolean => {
+  return profile?.profile_type === '';
+};
+
+export const getProfileTypeLabel = (profile: UserProfile | null): string => {
+  switch (profile?.profile_type) {
+    case 'club':
+      return 'Club';
+    case 'student':
+      return 'Student';
+    case '':
+      return 'Role Not Selected';
+    default:
+      return 'User';
+  }
+};

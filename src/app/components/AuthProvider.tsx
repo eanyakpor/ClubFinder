@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       user.user_metadata?.name || 
                       user.email?.split('@')[0] || 
                       'Unknown User',
-            is_club: false, // Default to student
+            profile_type: '', // Default to empty - user needs to select role
             club_name: null,
             bio: null,
             major: null,

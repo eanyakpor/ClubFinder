@@ -17,7 +17,7 @@ interface UserDropdownProps {
 }
 
 export default function UserDropdown({ user }: UserDropdownProps) {
-  const { signOut } = useAuth();
+  const { profile, signOut } = useAuth();
 
   if (!user) return null;
 
@@ -34,7 +34,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>
           <p className="text-sm text-muted-foreground">
-            {user?.user_metadata.club ? "Club " : ""}Name
+            {profile?.profile_type === 'club' ? "Club " : ""}Name
           </p>
           <p>{user?.user_metadata.name}</p>
         </DropdownMenuLabel>
