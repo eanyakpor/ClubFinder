@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,28 +9,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { getSupabaseClient } from "@/app/lib/supabaseServer";
+import { useAuth } from "../../AuthProvider";
 import { User } from "@supabase/supabase-js";
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 
 interface UserDropdownProps {
-  user: {
-    name: string;
-    isClub: boolean;
-  };
+  user: User | null;
 }
 
-export default function UserDropdown({ user }: { user: User | null }) {
-  const supabase = getSupabaseClient();
+export default function UserDropdown({ user }: UserDropdownProps) {
+  const { profile, clubName, signOut } = useAuth();
+  const {setTheme, theme} = useTheme();
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-  };
+  if (!user) return null;
 
-  console.log(user);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer">
+        <Avatar className="cursor-pointer border-2 border-white">
           <AvatarImage src={user?.user_metadata.picture} />
           <AvatarFallback className="bg-primary text-primary-foreground">
             {user?.user_metadata.name[0]}
@@ -40,21 +36,39 @@ export default function UserDropdown({ user }: { user: User | null }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>
-          <p className="text-sm text-muted-foreground">
-            {user?.user_metadata.club ? "Club " : ""}Name
+          <p className="text-sm text-muted-foreground/60">
+            {profile?.profile_type === 'club' ? "Club Name" : "Name"}
           </p>
-          <p>{user?.user_metadata.name}</p>
+          <p>
+            {profile?.profile_type === 'club' && clubName 
+              ? clubName 
+              : user?.user_metadata.name}
+          </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/">View Events</Link>
+        {profile?.profile_type === 'club' && (
+          <>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/">View Events</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/dashboard/analytics">View Dashboard</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="/dashboard/club-info">Edit Club Info</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        {/* Theme Toggle */}
+        <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+          {theme === 'light' ? (<>
+          <Sun className="h-4 w-4" /> Light Mode
+          </>) : (<>
+          <Moon className="h-4 w-4" /> Dark Mode
+          </>)}
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/dashboard/analytics">View Dashboard</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" asChild>
-          <Link href="/dashboard/club-info">Edit Club Info</Link>
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
           Log Out

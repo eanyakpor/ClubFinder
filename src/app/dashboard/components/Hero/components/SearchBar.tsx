@@ -3,8 +3,17 @@
 import React from "react";
 import { Search } from "lucide-react";
 
-function SearchBar() {
-  const [searchQuery, setSearchQuery] = React.useState("");
+interface SearchBarProps {
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+}
+
+function SearchBar({ searchQuery: externalSearchQuery, setSearchQuery: externalSetSearchQuery }: SearchBarProps = {}) {
+  const [internalSearchQuery, setInternalSearchQuery] = React.useState("");
+  
+  // Use external state if provided, otherwise use internal state
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
+  const setSearchQuery = externalSetSearchQuery || setInternalSearchQuery;
 
   return (
     <div className="flex justify-around items-center gap-2 px-10 py-2 bg-card border-[1px] border-border rounded-full shadow-md">

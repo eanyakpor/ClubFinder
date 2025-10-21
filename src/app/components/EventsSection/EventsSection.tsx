@@ -1,3 +1,4 @@
+"use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TodayEventsCard from "./TodayEventsCard";
 import EventGrid from "./EventList/EventList";
@@ -8,7 +9,11 @@ interface EventsSectionProps {
   today: any[];
 }
 
-export default function EventsSection({ upcoming, past, today }: EventsSectionProps) {
+export default function EventsSection({
+  upcoming,
+  past,
+  today,
+}: EventsSectionProps) {
   return (
     <div className="flex justify-center px-20 gap-8">
       <div className="">
@@ -18,7 +23,7 @@ export default function EventsSection({ upcoming, past, today }: EventsSectionPr
         >
           {/* Today's Events (Mobile) */}
           <TodayEventsCard today={today} isMobile={true} />
-          
+
           {/* Tabs */}
           <div className="flex-col justify-center items-center xl:justify-start">
             <TabsList className="mb-4">
@@ -36,11 +41,11 @@ export default function EventsSection({ upcoming, past, today }: EventsSectionPr
             <TabsContent value="upcoming">
               <EventGrid events={upcoming} />
             </TabsContent>
-            
+
             <TabsContent value="past">
               <EventGrid events={past} />
             </TabsContent>
-            
+
             {/* Today's Events (Desktop) */}
             <TodayEventsCard today={today} isMobile={false} />
           </div>

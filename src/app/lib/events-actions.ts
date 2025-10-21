@@ -6,24 +6,12 @@
 
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@/utils/supabase/client"
 
 // Server-only Supabase client for data operations
-function createDataSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  )
-}
 
 export async function getUpcomingEvents(clubName?: string) {
-  const supabase = createDataSupabaseClient()
+  const supabase = await createClient()
   const nowIso = new Date().toISOString()
 
   let query = supabase
@@ -47,7 +35,7 @@ export async function getUpcomingEvents(clubName?: string) {
 }
 
 export async function getPastEvents(limit: number = 10, clubName?: string) {
-  const supabase = createDataSupabaseClient()
+  const supabase = await createClient()
   const nowIso = new Date().toISOString()
 
   let query = supabase
@@ -72,7 +60,7 @@ export async function getPastEvents(limit: number = 10, clubName?: string) {
 }
 
 export async function getTodayEvents(clubName?: string) {
-  const supabase = createDataSupabaseClient()
+  const supabase = await createClient()
   const now = new Date()
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
   const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()

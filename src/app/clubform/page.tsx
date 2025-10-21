@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useAuth } from "../components/AuthProvider";
 import AddDiscordIntegration from "../components/Integrations/AddDiscordIntegration";
 import ConnectToDiscordButton from "../components/Integrations/AddToDiscordButton";
 
@@ -11,8 +12,6 @@ const supabase = createClient(
 );
 
 type FormState = {
-  club_name: string;        // required
-  club_email?: string;      // optional
   event_name: string;       // required
   date: string;             // required (yyyy-mm-dd)
   time: string;             // required (hh:mm)
@@ -31,9 +30,8 @@ type ClubRow = {
 };
 
 export default function ClubFormPage() {
+  const { user, profile, loading } = useAuth();
   const [form, setForm] = useState<FormState>({
-    club_name: "",
-    club_email: "",
     event_name: "",
     date: "",
     time: "",
@@ -47,6 +45,7 @@ export default function ClubFormPage() {
   const [ok, setOk] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [clubId, setClubId] = useState<string | null>(null);
+  const [clubInfo, setClubInfo] = useState<ClubRow | null>(null);
   const [discordConnected, setDiscordConnected] = useState<boolean>(false);
   const [needsClubOnboarding, setNeedsClubOnboarding] = useState<boolean>(false);
 
@@ -55,32 +54,28 @@ export default function ClubFormPage() {
   }
 
   useEffect(() => {
+    if (loading) return; // Wait for AuthProvider to load
+
+    if (!user) {
+      console.log("[clubform] no user; redirecting to login");
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!profile) {
+      setErr("Profile not found. Please complete your profile setup.");
+      return;
+    }
+
+    if (profile.profile_type !== "club") {
+      setErr(`This page is only for club accounts. Your profile type: ${profile.profile_type || 'none'}`);
+      return;
+    }
+
+    // Load club data
     (async () => {
-      console.log("[clubform] loading user + club…");
-      const { data: { user }, error: userErr } = await supabase.auth.getUser();
-      if (userErr) {
-        console.error("[clubform] getUser error:", userErr);
-        setErr("Authentication error. Please log in again.");
-        return;
-      }
-      if (!user) {
-        console.log("[clubform] no user; redirecting to login");
-        window.location.href = "/login";
-        return;
-      }
-
-      // Check if user has club role
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (profile?.role !== "club") {
-        setErr("This page is only for club accounts. Please log in with a club account.");
-        return;
-      }
-
+      console.log("[clubform] loading club data for user:", user.id);
+      
       const { data: club, error } = await supabase
         .from("clubs")
         .select("id, discord_channel_id, name, email")
@@ -89,6 +84,7 @@ export default function ClubFormPage() {
 
       if (error) {
         console.error("[clubform] failed to load club:", error);
+        setErr("Error loading club data. Please try again.");
         return;
       }
 
@@ -103,9 +99,10 @@ export default function ClubFormPage() {
       console.log("[clubform] club loaded:", club);
       setNeedsClubOnboarding(false);
       setClubId(club.id);
+      setClubInfo(club);
       setDiscordConnected(!!club.discord_channel_id);
     })();
-  }, []);
+  }, [user, profile, loading]);
 
   useEffect(() => {
     console.log("[clubform] clubId state now:", clubId, "discordConnected:", discordConnected);
@@ -118,8 +115,8 @@ export default function ClubFormPage() {
     setErr(null);
 
     // ✅ Client-side required checks
-    if (!form.club_name?.trim()) {
-      setErr("Please provide the Name of Club.");
+    if (!clubInfo?.name) {
+      setErr("Club information not loaded. Please refresh the page.");
       setSubmitting(false);
       return;
     }
@@ -143,12 +140,12 @@ export default function ClubFormPage() {
       const startIso = new Date(`${form.date}T${form.time}`).toISOString();
 
       const payload = {
-        club_name: form.club_name.trim(),
+        club_name: clubInfo.name,
         title: form.event_name.trim(),
         description: form.other?.trim() || null,
         location: form.location?.trim() || null,
         start_time: startIso,
-        contact_email: form.club_email?.trim() || null, // optional
+        contact_email: clubInfo.email || null,
         status: "pending",
         repeat_weekly: !!form.repeat_weekly,
         repeat_until: form.repeat_until || null,        // YYYY-MM-DD accepted by Postgres date
@@ -188,8 +185,6 @@ export default function ClubFormPage() {
       }
 
       setForm({
-        club_name: "",
-        club_email: "",
         event_name: "",
         date: "",
         time: "",
@@ -207,39 +202,28 @@ export default function ClubFormPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-md p-6 text-black">
       <h1 className="text-2xl font-bold">Submit or Update Club Event</h1>
       <p className="mb-6 mt-1 text-sm">We’ll review before it appears on the homepage.</p>
 
+      {clubInfo && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <h2 className="font-medium text-blue-900 mb-2">Creating event for:</h2>
+          <p className="text-blue-800"><strong>{clubInfo.name}</strong></p>
+          {clubInfo.email && <p className="text-blue-700 text-sm">{clubInfo.email}</p>}
+        </div>
+      )}
+
       <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Name of Club <span className="text-red-600">*</span>
-          </label>
-          <input
-            className="w-full rounded border px-3 py-2"
-            type="text"
-            required
-            value={form.club_name}
-            onChange={(e) => onChange("club_name", e.target.value)}
-            placeholder="e.g., CSUN ACM"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Club Email <span className="text-xs text-gray-500">(optional)</span>
-          </label>
-          <input
-            className="w-full rounded border px-3 py-2"
-            type="email"
-            value={form.club_email}
-            onChange={(e) => onChange("club_email", e.target.value)}
-            placeholder="club@example.com"
-          />
-        </div>
-
         <div>
           <label className="mb-1 block text-sm font-medium">
             Event Name <span className="text-red-600">*</span>

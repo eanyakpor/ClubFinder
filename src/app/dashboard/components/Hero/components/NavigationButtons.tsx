@@ -20,9 +20,9 @@ function NavigationButtons() {
     <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
       <Button
         variant={"outline"}
-        className={`bg-card text-card-foreground ${
+        className={`bg-card text-card-foreground border-0 ${
           pathname.includes("/dashboard/analytics")
-            ? "bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
+            ? "bg-primary dark:bg-primary dark:hover:bg-primary/80 text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
             : ""
         } w-52`}
         onClick={() => handleSelectPage("analytics")}
@@ -31,9 +31,9 @@ function NavigationButtons() {
       </Button>
       <Button
         variant={"outline"}
-        className={`bg-card text-card-foreground ${
+        className={`bg-card text-card-foreground border-0 ${
           pathname.includes("/dashboard/club-events")
-            ? "bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
+            ? "bg-primary dark:bg-primary dark:hover:bg-primary/80 text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
             : ""
         } w-52`}
         onClick={() => handleSelectPage("club-events")}
@@ -42,9 +42,9 @@ function NavigationButtons() {
       </Button>
       <Button
         variant={"outline"}
-        className={`bg-card text-card-foreground ${
+        className={`bg-card text-card-foreground border-0 ${
           pathname.includes("/dashboard/club-info")
-            ? "bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
+            ? "bg-primary dark:bg-primary dark:hover:bg-primary/80 text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
             : ""
         } w-52`}
         onClick={() => handleSelectPage("club-info")}

@@ -2,21 +2,99 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from "@/utils/supabase/client";
+import { useAuth } from "../../components/AuthProvider";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function ClubOnboardingPage() {
+  const { user, profile, loading, refreshClubStatus } = useAuth();
   const router = useRouter();
-  const [form, set] = useState({ name: "", email: "", instagram: "", discord: "", website: "" });
+  const supabase = createClient();
+
+  // Redirect if not authenticated or not a club
+  if (!loading && (!user || (profile && profile.profile_type !== "club"))) {
+    router.push("/");
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] bg-gradient-to-b from-primary to-secondary">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  const [form, set] = useState({
+    name: "",
+    email: "",
+    instagram: "",
+    discord: "",
+    website: "",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   function onChange<K extends keyof typeof form>(key: K, value: string) {
     set((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function applyPendingDiscordConfig(clubId: string) {
+    try {
+      console.log("Applying pending Discord config for club:", clubId);
+      const pendingConfig = localStorage.getItem("pendingDiscordConfig");
+      console.log("Pending config from localStorage:", pendingConfig);
+      
+      if (!pendingConfig) {
+        console.log("No pending Discord config found");
+        return;
+      }
+
+      const config = JSON.parse(pendingConfig);
+      const { guildId, channelId } = config;
+      console.log("Parsed config:", { guildId, channelId });
+
+      if (!guildId || !channelId) {
+        console.log("Missing guildId or channelId");
+        return;
+      }
+
+      // Get the current Supabase session token
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        console.error("No session for Discord config save:", sessionError);
+        return;
+      }
+
+      console.log("Making API call to save Discord config");
+      // Save Discord configuration
+      const r = await fetch("/api/discord/save-target", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ clubId, guildId, channelId }),
+      });
+
+      const responseData = await r.json();
+      console.log("API response:", { status: r.status, data: responseData });
+
+      if (r.ok) {
+        console.log("Discord configuration applied successfully");
+        // Clear the pending config
+        localStorage.removeItem("pendingDiscordConfig");
+      } else {
+        console.error("Failed to apply Discord configuration:", responseData);
+      }
+    } catch (error) {
+      console.error("Error applying pending Discord config:", error);
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -25,13 +103,6 @@ export default function ClubOnboardingPage() {
     setMessage(null);
 
     // 1) Must be logged in
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr) {
-      console.error("getUser error:", userErr);
-      setMessage("Auth error. Please re-login.");
-      setSubmitting(false);
-      return;
-    }
     if (!user) {
       setMessage("You must be logged in.");
       setSubmitting(false);
@@ -56,7 +127,7 @@ export default function ClubOnboardingPage() {
           {
             owner_user_id: user.id,
             name,
-            type: "organization", // 🚨 REQUIRED by your schema (NOT NULL)
+            type: "organization", // Default to organization for now
             email,
             instagram_url: form.instagram.trim() || null,
             discord_invite: form.discord.trim() || null,
@@ -73,7 +144,9 @@ export default function ClubOnboardingPage() {
 
       if (upsertErr) {
         console.error("clubs upsert error:", upsertErr);
-        setMessage(upsertErr.message || "Error saving club info. Please try again.");
+        setMessage(
+          upsertErr.message || "Error saving club info. Please try again."
+        );
         setSubmitting(false);
         return;
       }
@@ -85,8 +158,15 @@ export default function ClubOnboardingPage() {
       }
 
       const clubId = upserted.id as string;
-      // Redirect to Social Media dashboard instead of starting Discord OAuth here
-      window.location.href = "/SocialMediaDashboard";
+      console.log("Club created successfully with ID:", clubId);
+
+      // Discord integration is now handled separately via "Connect Discord" button
+
+      // Refresh club status in AuthProvider
+      await refreshClubStatus();
+
+      // Redirect to home page - the AuthProvider will detect the new club
+      router.push("/");
     } catch (err: any) {
       console.error("onboarding save error:", err);
       setMessage("Error saving club info. Please try again.");
@@ -95,25 +175,71 @@ export default function ClubOnboardingPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-6 text-black">
-      <h1 className="text-2xl font-bold mb-3">Club Onboarding</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <input className="w-full rounded border px-3 py-2" placeholder="Club name *"
-               value={form.name} onChange={(e)=>onChange("name", e.target.value)} />
-        <input className="w-full rounded border px-3 py-2" placeholder="Official club email *"
-               type="email" value={form.email} onChange={(e)=>onChange("email", e.target.value)} />
-        <input className="w-full rounded border px-3 py-2" placeholder="Instagram URL (optional)"
-               value={form.instagram} onChange={(e)=>onChange("instagram", e.target.value)} />
-        <input className="w-full rounded border px-3 py-2" placeholder="Discord invite (optional)"
-               value={form.discord} onChange={(e)=>onChange("discord", e.target.value)} />
-        <input className="w-full rounded border px-3 py-2" placeholder="Website URL (optional)"
-               value={form.website} onChange={(e)=>onChange("website", e.target.value)} />
-        <button disabled={submitting}
-          className="w-full rounded bg-black text-white py-2 hover:opacity-90 disabled:opacity-60">
-          {submitting ? "Saving…" : "Save & Continue"}
-        </button>
-        {message && <p className={`text-sm ${message.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{message}</p>}
-      </form>
-    </main>
+    <div className="flex items-center justify-center h-[calc(100vh-56px)] p-6 overflow-y-auto bg-gradient-to-b from-primary to-background">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <h1 className="text-xl font-semibold">Club Onboarding</h1>
+          <p className="text-muted-foreground">
+            Complete the form below to create your club.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="flex flex-col gap-4 items-center">
+            <Label className="w-full">Club Name <span className="text-red-500">*</span></Label>
+            <Input
+              placeholder="e.g. Tech Club"
+              value={form.name}
+              onChange={(e) => onChange("name", e.target.value)}
+              className="border-border"
+            />
+
+            <Label className="w-full">Official club email <span className="text-red-500">*</span></Label>
+            <Input
+              placeholder="e.g. tech@clubfinder.com"
+              type="email"
+              value={form.email}
+              onChange={(e) => onChange("email", e.target.value)}
+              className="border-border"
+            />
+            <Label className="w-full">Instagram URL <span className="text-muted-foreground">(optional)</span></Label>
+            <Input
+              placeholder="e.g. https://www.instagram.com/techclub"
+              value={form.instagram}
+              onChange={(e) => onChange("instagram", e.target.value)}
+              className="border-border"
+            />
+            <Label className="w-full">Discord invite <span className="text-muted-foreground">(optional)</span></Label>
+            <Input
+              placeholder="e.g. https://discord.gg/techclub"
+              value={form.discord}
+              onChange={(e) => onChange("discord", e.target.value)}
+              className="border-border"
+            />
+            <Label className="w-full">Website URL <span className="text-muted-foreground">(optional)</span></Label>
+            <Input
+              placeholder="e.g. https://techclub.com"
+              value={form.website}
+              onChange={(e) => onChange("website", e.target.value)}
+              className="border-border"
+            />
+            <Button
+              disabled={submitting || !form.name || !form.email}
+              className="w-min"
+            >
+              {submitting ? "Saving…" : "Save & Continue"}
+            </Button>
+            {message && (
+              <p
+                className={`text-sm ${
+                  message.startsWith("✅") ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const state = searchParams.get("state"); // clubId
-  if (!state) {
+  const clubId = searchParams.get("state"); // clubId
+  const returnTo = searchParams.get("return_to") || "/clubform";
+  
+  if (!clubId) {
     return NextResponse.json({ error: "Missing state (clubId)" }, { status: 400 });
   }
+
+  // Encode both clubId and return_to in the state parameter
+  const stateData = JSON.stringify({ clubId, returnTo });
+  const encodedState = Buffer.from(stateData).toString('base64');
 
   const redirectUri = process.env.DISCORD_REDIRECT_URI!;
   const clientId = process.env.DISCORD_CLIENT_ID!;
@@ -15,7 +21,7 @@ export async function GET(req: Request) {
   authUrl.searchParams.set("redirect_uri", redirectUri);
   authUrl.searchParams.set("response_type", "code");
   authUrl.searchParams.set("scope", scopes);
-  authUrl.searchParams.set("state", state);
+  authUrl.searchParams.set("state", encodedState);
 
   // must return an absolute redirect
   return NextResponse.redirect(authUrl.toString());

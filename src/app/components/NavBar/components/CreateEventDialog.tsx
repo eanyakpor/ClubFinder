@@ -13,9 +13,10 @@ import CreateEventForm from "../../CreateEventForm/CreateEventForm";
 
 interface CreateEventDialogProps {
   isClub: boolean;
+  isScrolled: boolean;
 }
 
-export default function CreateEventDialog({ isClub }: CreateEventDialogProps) {
+export default function CreateEventDialog({ isClub, isScrolled }: CreateEventDialogProps) {
   const [open, setOpen] = React.useState(false);
 
   if (!isClub) return null;
@@ -23,13 +24,13 @@ export default function CreateEventDialog({ isClub }: CreateEventDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary text-primary-foreground text-xs rounded-full">
+        <Button variant="outline" className={'bg-primary text-primary-foreground text-xs rounded-full border-white/80 dark:bg-primary dark:border-none ' + (isScrolled ? 'hover:bg-primary/60 hover:text-primary-foreground' : '')}>
           Create Event
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[425px] sm:max-w-[425px]">
+      <DialogContent className="p-0 pb-6 flex flex-col w-[425px] sm:max-w-[425px] !max-h-[692px]">
         <DialogHeader>
-          <DialogTitle>Create Event</DialogTitle>
+          <DialogTitle className="p-6 pb-4">Create Event</DialogTitle>
         </DialogHeader>
         <CreateEventForm />
       </DialogContent>

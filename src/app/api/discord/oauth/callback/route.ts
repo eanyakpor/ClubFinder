@@ -4,10 +4,22 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code  = url.searchParams.get("code");
-  const state = url.searchParams.get("state") || ""; // your clubId
-  const returnTo = url.searchParams.get("return_to") || "/clubform";
+  const encodedState = url.searchParams.get("state") || "";
+  
+  // Decode the state parameter to get clubId and returnTo
+  let clubId = "";
+  let returnTo = "/clubform";
+  
+  try {
+    const stateData = JSON.parse(Buffer.from(encodedState, 'base64').toString());
+    clubId = stateData.clubId || "";
+    returnTo = stateData.returnTo || "/clubform";
+  } catch (error) {
+    // Fallback for old format (just clubId)
+    clubId = encodedState;
+  }
   if (!code) {
-    const u = new URL(`/connect/discord?err=missing_code&return_to=${encodeURIComponent(returnTo)}`, new URL(req.url).origin);
+    const u = new URL(`${returnTo}?err=missing_code`, new URL(req.url).origin);
     return NextResponse.redirect(u.toString());
   }
 
@@ -27,19 +39,16 @@ export async function GET(req: Request) {
   const token = await r.json();
   if (!r.ok) {
     const detail = token?.error_description || "oauth_failed";
-    const u = new URL(`/connect/discord?err=oauth&detail=${encodeURIComponent(detail)}`, new URL(req.url).origin);
+    const u = new URL(`${returnTo}?err=oauth&detail=${encodeURIComponent(detail)}`, new URL(req.url).origin);
     return NextResponse.redirect(u.toString());
   }
 
-  // MVP: return to quick selector with token + clubId
+  // Return to the specified return_to URL with token + clubId
   const qs = new URLSearchParams({
-    clubId: state,
+    clubId: clubId,
     accessToken: token.access_token || "",
-    return_to: returnTo,
   });
 
-  {
-    const u = new URL(`/connect/discord?${qs.toString()}`, new URL(req.url).origin);
-    return NextResponse.redirect(u.toString());
-  }
+  const u = new URL(`${returnTo}?${qs.toString()}`, new URL(req.url).origin);
+  return NextResponse.redirect(u.toString());
 }

@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
-    <footer className="mt-12 text-center text-sm text-gray-500">
-      © {new Date().getFullYear()} CSUN Club Finder
+    <footer className="flex items-center justify-center w-full p-6 text-muted-foreground">
+      © {new Date().getFullYear()} ClubFinder
     </footer>
   );
 }
