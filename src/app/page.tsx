@@ -10,21 +10,11 @@ export const dynamic = "force-dynamic"; // force dynamic rendering
 
 import { getSupabaseClient } from "./lib/supabase";
 import PreviewBanner from "./components/PreviewBanner";
-import SearchView from "./SearchViewFile";
-import NavBar from "./components/NavBar/NavBar";
+import ClubBanner from "./components/ClubBanner";
+import SignOutButton from "./components/SignOutButton";
 import Hero from "./components/Hero/Hero";
-
-function fmtDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("en-US", {
-    timeZone: "America/Los_Angeles", // force PST/PDT for display
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+import SearchView from "./components/SearchView";
+import NavBar from "./components/NavBar/NavBar";
 
 export default async function Home() {
   const supabase = getSupabaseClient();
@@ -61,12 +51,16 @@ const user = {
     interests: ["Art", "Business", "STEM", "Sports", "Music", "Dance", "Theater", "Film", "Literature", "Writing", "Photography"], // 12 interests
   }
 
+  console.log(upcoming[0]); // For debugging
+
   return (
     <main className="">
       <NavBar user={user}/>
       <Hero user={user} />
       <PreviewBanner />
-      <SearchView upcoming_full={upcoming} past_full={past}/>
+      <ClubBanner/>
+      <SignOutButton/>
+      <SearchView upcoming_full={upcoming} past_full={past} />
 
       <footer className="mt-12 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} CSUN Club Finder
