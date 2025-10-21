@@ -6,25 +6,25 @@
 
 "use server";
 
-import { validateUserSession } from "./supabase-server";
+// import { validateUserSession } from "./supabase-server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function getCurrentUser() {
-  try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("sb-access-token")?.value;
+// export async function getCurrentUser() {
+//   try {
+//     const cookieStore = await cookies();
+//     const accessToken = cookieStore.get("sb-access-token")?.value;
 
-    if (!accessToken) {
-      return null;
-    }
+//     if (!accessToken) {
+//       return null;
+//     }
 
-    return await validateUserSession(accessToken);
-  } catch (error) {
-    console.error("Error getting current user:", error);
-    return null;
-  }
-}
+//     return await validateUserSession(accessToken);
+//   } catch (error) {
+//     console.error("Error getting current user:", error);
+//     return null;
+//   }
+// }
 
 export async function signOut() {
   try {

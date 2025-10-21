@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import NavBar from "./NavBar/NavBar";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseClient } from "../lib/supabaseServer";
-import { getCurrentUser } from "../lib/auth-actions";
+// import { getCurrentUser } from "../lib/auth-actions";
 
 interface AuthContextType {
   user: User | null;
