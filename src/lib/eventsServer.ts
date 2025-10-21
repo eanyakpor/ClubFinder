@@ -133,6 +133,111 @@ export async function getTodayEvents(clubName?: string) {
 }
 
 /**
+ * Fetch upcoming events for a specific club owner
+ * @param ownerUserId - User ID of the club owner
+ */
+export async function getClubOwnerUpcomingEvents(ownerUserId: string) {
+  const supabase = await createClient();
+  const nowIso = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, title, club_name, location, start_time, description, status")
+    .eq("owner_user_id", ownerUserId)
+    .gte("start_time", nowIso)
+    .order("start_time", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+/**
+ * Fetch past events for a specific club owner
+ * @param ownerUserId - User ID of the club owner
+ */
+export async function getClubOwnerPastEvents(ownerUserId: string) {
+  const supabase = await createClient();
+  const nowIso = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, title, club_name, location, start_time, description, status")
+    .eq("owner_user_id", ownerUserId)
+    .lt("start_time", nowIso)
+    .order("start_time", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+/**
+ * Fetch today's events for a specific club owner
+ * @param ownerUserId - User ID of the club owner
+ */
+export async function getClubOwnerTodayEvents(ownerUserId: string) {
+  const supabase = await createClient();
+  const now = new Date();
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  ).toISOString();
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1
+  ).toISOString();
+
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, title, club_name, location, start_time, description, status")
+    .eq("owner_user_id", ownerUserId)
+    .gte("start_time", startOfDay)
+    .lt("start_time", endOfDay)
+    .order("start_time", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+/**
+ * Fetch all events data for a specific club owner
+ * @param ownerUserId - User ID of the club owner
+ */
+export async function getClubOwnerEventsData(ownerUserId: string) {
+  try {
+    const [upcoming, past, today] = await Promise.all([
+      getClubOwnerUpcomingEvents(ownerUserId),
+      getClubOwnerPastEvents(ownerUserId),
+      getClubOwnerTodayEvents(ownerUserId),
+    ]);
+
+    return {
+      upcoming,
+      past,
+      today,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      upcoming: [],
+      past: [],
+      today: [],
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+}
+
+/**
  * Fetch all events data needed for event pages
  * @param clubName - Optional club name to filter by
  */

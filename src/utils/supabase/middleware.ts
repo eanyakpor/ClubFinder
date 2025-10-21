@@ -37,14 +37,79 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Basic authentication check
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith('/login')
+    !request.nextUrl.pathname.startsWith('/login') &&
+    request.nextUrl.pathname !== '/'
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Protect onboarding and discord integration routes
+  if (user && (
+    request.nextUrl.pathname.startsWith('/onboarding') ||
+    request.nextUrl.pathname === '/role'
+  )) {
+    try {
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('profile_type')
+        .eq('id', user.id)
+        .single()
+
+      // If user is a student, redirect them away from onboarding
+      if (profile?.profile_type === 'student') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
+
+      // For club users, check if they need specific onboarding steps
+      if (profile?.profile_type === 'club') {
+        // Get club data to check completion status
+        const { data: club } = await supabase
+          .from('clubs')
+          .select('name, email')
+          .eq('owner_user_id', user.id)
+          .single()
+
+        // If accessing /onboarding/discord but club info is incomplete, redirect to club onboarding
+        if (request.nextUrl.pathname === '/onboarding/discord' && (!club?.name || !club?.email)) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/onboarding/club'
+          return NextResponse.redirect(url)
+        }
+
+        // If accessing /onboarding/club but club is already complete, redirect to home
+        if (request.nextUrl.pathname === '/onboarding/club' && club?.name && club?.email) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/'
+          return NextResponse.redirect(url)
+        }
+
+        // If accessing /role but profile_type is already set, redirect to home
+        if (request.nextUrl.pathname === '/role') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/'
+          return NextResponse.redirect(url)
+        }
+      }
+
+      // If profile_type is empty and not on /role, redirect to role selection
+      if (!profile?.profile_type && request.nextUrl.pathname !== '/role') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/role'
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      console.error('Error checking profile in middleware:', error)
+      // On error, allow access but log the issue
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

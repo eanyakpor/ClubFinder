@@ -33,7 +33,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground/60">
             {profile?.profile_type === 'club' ? "Club Name" : "Name"}
           </p>
           <p>

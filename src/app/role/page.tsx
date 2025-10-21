@@ -57,7 +57,7 @@ export default function RoleSelectionPage() {
     <div className="flex flex-col items-center md:justify-center h-[calc(100vh-56px)] p-6 gap-6 overflow-y-auto">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-card-foreground mb-2">
-          Welcome to Project X!
+          Welcome to ClubFinder!
         </h1>
         <p className="text-muted-foreground">
           Please select your role to get started

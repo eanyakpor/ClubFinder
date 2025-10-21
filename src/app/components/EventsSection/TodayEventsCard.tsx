@@ -18,19 +18,25 @@ export default function TodayEventsCard({ today, isMobile = false }: TodayEvents
         <h1>Events Today</h1>
       </CardTitle>
       <CardContent className="flex flex-col gap-4">
-        {today
-          .map((event) => toEventItem(event))
-          .map((event) => (
-            <Card 
-              key={'event' + event.id} 
-              className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200"
-            >
-              <CardTitle className="px-6">{event.club}</CardTitle>
-              <CardContent className="px-6 text-muted-foreground">
-                {event.title}
-              </CardContent>
-            </Card>
-          ))}
+        {today.length === 0 ? (
+          <div className="text-center py-4 text-muted-foreground">
+            <p className="text-sm">No events scheduled for today</p>
+          </div>
+        ) : (
+          today
+            .map((event) => toEventItem(event))
+            .map((event) => (
+              <Card 
+                key={'event' + event.id} 
+                className="gap-4 cursor-pointer hover:brightness-95 transition-all duration-200"
+              >
+                <CardTitle className="px-6">{event.club}</CardTitle>
+                <CardContent className="px-6 text-muted-foreground">
+                  {event.title}
+                </CardContent>
+              </Card>
+            ))
+        )}
       </CardContent>
     </Card>
   );

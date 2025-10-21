@@ -112,6 +112,11 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
     setOk(null);
     setErr(null);
 
+    if (!user) {
+      setErr("You must be logged in to create events.");
+      setSubmitting(false);
+      return;
+    }
     if (!clubInfo?.name) {
       setErr("Club information not loaded. Please refresh.");
       setSubmitting(false);
@@ -151,6 +156,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         status: "pending",
         repeat_weekly: !!form.repeat_weekly,
         repeat_until: form.repeat_until ? form.repeat_until : null,
+        owner_user_id: user.id,
       };
 
       console.log("Inserting event payload:", payload);
@@ -359,7 +365,7 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           {!discordConnected ? (
             <div className="flex items-center gap-2">
               <Button type="button" variant="outline" size="sm" asChild>
-                <a href="/SocialMediaDashboard">Connect Discord</a>
+                <a href="/onboarding/discord">Connect Discord</a>
               </Button>
               <span className="text-sm text-red-500">
                 Set up Discord integration to enable posting
@@ -383,12 +389,12 @@ function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           )}
         </div>
 
-        <Button type="submit" disabled={submitting} className="w-full">
-          {submitting ? "Creating..." : "Create Event"}
-        </Button>
 
         {ok && <p className="text-green-600 text-sm">{ok}</p>}
         {err && <p className="text-red-600 text-sm">{err}</p>}
+        <Button type="submit" disabled={submitting} className="w-full">
+          {submitting ? "Creating..." : "Create Event"}
+        </Button>
       </form>
     </div>
   );
