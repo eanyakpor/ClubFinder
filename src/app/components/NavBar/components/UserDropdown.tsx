@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { useAuth } from "../../AuthProvider";
 import { User } from "@supabase/supabase-js";
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 
 interface UserDropdownProps {
   user: User | null;
@@ -18,6 +20,7 @@ interface UserDropdownProps {
 
 export default function UserDropdown({ user }: UserDropdownProps) {
   const { profile, clubName, signOut } = useAuth();
+  const {setTheme, theme} = useTheme();
 
   if (!user) return null;
 
@@ -57,6 +60,15 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             <DropdownMenuSeparator />
           </>
         )}
+        {/* Theme Toggle */}
+        <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+          {theme === 'light' ? (<>
+          <Sun className="h-4 w-4" /> Light Mode
+          </>) : (<>
+          <Moon className="h-4 w-4" /> Dark Mode
+          </>)}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
           Log Out
         </DropdownMenuItem>
