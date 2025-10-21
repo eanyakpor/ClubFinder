@@ -1,4 +1,4 @@
-"use client";
+
 
 import { SectionCards } from "./components/overview/section-cards";
 import InterestTrends from "./components/activity_and_trends/InterestTrends";
