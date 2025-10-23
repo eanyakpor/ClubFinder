@@ -35,8 +35,8 @@ By providing a single, centralized platform, Club Connect removes barriers for b
 
 ## Submission Materials
 - **GitHub Repository:** [Insert link here]  
-- **Live Demo:** [Insert deployed app link]  
-- **Video Demo:** [Insert video link, maximum three minutes]  
+- ## 🎬 Demo
+Watch the full demo here: [https://youtu.be/oKfPCOdwmOE](https://youtu.be/oKfPCOdwmOE) 
 - **Optional Mockups or Screenshots:** [Insert if available]  
 
 ---
